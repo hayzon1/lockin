@@ -1,38 +1,65 @@
-import { Target, CheckCircle2, Calendar, TrendingUp } from 'lucide-react';
+import { useState } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import AppLayout from './layouts/AppLayout';
+import AuthPage from './pages/AuthPage';
+import DashboardPage from './pages/DashboardPage';
+import PeriodsPage from './pages/PeriodsPage';
+import CalendarPage from './pages/CalendarPage';
+import AnalyticsPage from './pages/AnalyticsPage';
+import SettingsPage from './pages/SettingsPage';
+import { Target } from 'lucide-react';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 1000 * 30, // 30 seconds
+    },
+  },
+});
+
+type NavTab = 'dashboard' | 'periods' | 'calendar' | 'analytics' | 'settings';
+
+function MainApp() {
+  const { user, loading } = useAuth();
+  const [currentTab, setCurrentTab] = useState<NavTab>('dashboard');
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center">
+        <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-400 mb-4 animate-pulse">
+          <Target className="w-8 h-8" />
+        </div>
+        <p className="text-xs text-zinc-500 font-mono tracking-wider uppercase">Loading LOCKIN...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthPage />;
+  }
+
+  return (
+    <AppLayout currentTab={currentTab} setCurrentTab={setCurrentTab}>
+      {currentTab === 'dashboard' && (
+        <DashboardPage onNavigateToPeriods={() => setCurrentTab('periods')} />
+      )}
+      {currentTab === 'periods' && <PeriodsPage />}
+      {currentTab === 'calendar' && <CalendarPage />}
+      {currentTab === 'analytics' && <AnalyticsPage />}
+      {currentTab === 'settings' && <SettingsPage />}
+    </AppLayout>
+  );
+}
 
 export default function App() {
   return (
-    <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col items-center justify-center p-6">
-      <div className="max-w-md w-full border border-zinc-800 rounded-xl p-8 bg-zinc-900/60 shadow-2xl backdrop-blur-md">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-emerald-400">
-            <Target className="w-6 h-6" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-white">LOCKIN</h1>
-            <p className="text-xs text-zinc-400">Consistency over perfection</p>
-          </div>
-        </div>
-
-        <p className="text-sm text-zinc-300 mb-6 leading-relaxed">
-          Foundation initialized. Ready for habit tracking, customizable tracking periods, and consistency analytics.
-        </p>
-
-        <div className="space-y-3 pt-2 border-t border-zinc-800/80">
-          <div className="flex items-center gap-3 text-xs text-zinc-400">
-            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-            <span>Database migrations verified in PostgreSQL</span>
-          </div>
-          <div className="flex items-center gap-3 text-xs text-zinc-400">
-            <Calendar className="w-4 h-4 text-emerald-500" />
-            <span>Period & Habit schema configured</span>
-          </div>
-          <div className="flex items-center gap-3 text-xs text-zinc-400">
-            <TrendingUp className="w-4 h-4 text-emerald-500" />
-            <span>Spring Boot 3.3 API ready</span>
-          </div>
-        </div>
-      </div>
-    </main>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <MainApp />
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
