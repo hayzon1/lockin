@@ -19,4 +19,6 @@ public interface TrackingPeriodRepository extends JpaRepository<TrackingPeriodEn
     Optional<TrackingPeriodEntity> findByIdAndUserId(UUID id, UUID userId);
 
     boolean existsByUserIdAndStatus(UUID userId, PeriodStatus status);
+
+    long countByStatus(PeriodStatus status);
 }

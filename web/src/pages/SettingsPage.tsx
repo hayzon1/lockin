@@ -40,6 +40,9 @@ export default function SettingsPage() {
   // Preferences form
   const [timezone, setTimezone] = useState(user?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC');
   const [theme, setTheme] = useState<Theme>(user?.theme || 'dark');
+  const [fullName, setFullName] = useState(user?.fullName || '');
+  const [age, setAge] = useState(user?.age ? String(user.age) : '');
+  const [gender, setGender] = useState(user?.gender || '');
   const [prefLoading, setPrefLoading] = useState(false);
   const [prefSuccess, setPrefSuccess] = useState<string | null>(null);
   const [prefError, setPrefError] = useState<string | null>(null);
@@ -68,9 +71,16 @@ export default function SettingsPage() {
     setPrefError(null);
 
     try {
-      await api.updateUser({ timezone, theme });
+      const parsedAge = age.trim() ? parseInt(age.trim(), 10) : undefined;
+      await api.updateUser({
+        timezone,
+        theme,
+        fullName: fullName.trim() || undefined,
+        age: parsedAge,
+        gender: gender || undefined,
+      });
       await refreshUser();
-      setPrefSuccess('Preferences updated successfully.');
+      setPrefSuccess('Profile details and preferences updated successfully.');
     } catch (err: unknown) {
       setPrefError(err instanceof Error ? err.message : 'Failed to update preferences.');
     } finally {
@@ -179,20 +189,26 @@ export default function SettingsPage() {
             </div>
           </div>
           <div>
-            <span className="text-zinc-500 block mb-1">Status</span>
-            <span className="font-mono text-zinc-300">Active Member</span>
+            <span className="text-zinc-500 block mb-1">Account Role</span>
+            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase ${
+              user?.role === 'ADMIN'
+                ? 'bg-purple-500/10 text-purple-400 border border-purple-500/30'
+                : 'bg-zinc-800 text-zinc-300 border border-zinc-700/60'
+            }`}>
+              {user?.role || 'USER'}
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Preferences Form */}
+      {/* Preferences & Demographics Form */}
       <div className="p-6 rounded-2xl border border-zinc-800 bg-zinc-900/40">
         <h3 className="text-base font-semibold text-white mb-1 flex items-center gap-2">
           <Globe className="w-4 h-4 text-emerald-400" />
-          <span>Tracking & Appearance</span>
+          <span>Profile & Appearance</span>
         </h3>
         <p className="text-xs text-zinc-400 mb-6">
-          Dates and streaks are calculated strictly with respect to your configured time zone.
+          Personal details and time zone for accurate local date calculations.
         </p>
 
         {prefSuccess && (
@@ -207,6 +223,51 @@ export default function SettingsPage() {
         )}
 
         <form onSubmit={handleSavePreferences} className="space-y-5">
+          <div>
+            <label className="block text-xs font-medium text-zinc-300 mb-1.5">
+              Full Name
+            </label>
+            <input
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="e.g. Alex Morgan"
+              className="w-full bg-zinc-900 border border-zinc-700/80 rounded-xl px-3.5 py-2.5 text-xs text-zinc-200 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-zinc-300 mb-1.5">
+                Age
+              </label>
+              <input
+                type="number"
+                min="1"
+                max="120"
+                value={age}
+                onChange={(e) => setAge(e.target.value)}
+                placeholder="e.g. 28"
+                className="w-full bg-zinc-900 border border-zinc-700/80 rounded-xl px-3.5 py-2.5 text-xs text-zinc-200 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-zinc-300 mb-1.5">
+                Gender
+              </label>
+              <select
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+                className="w-full bg-zinc-900 border border-zinc-700/80 rounded-xl px-3.5 py-2.5 text-xs text-zinc-200 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+              >
+                <option value="">Select...</option>
+                <option value="MALE">Male</option>
+                <option value="FEMALE">Female</option>
+                <option value="NON_BINARY">Non-Binary</option>
+                <option value="PREFER_NOT_TO_SAY">Prefer not to say</option>
+              </select>
+            </div>
+          </div>
           <div>
             <label htmlFor="user-timezone" className="block text-xs font-medium text-zinc-300 mb-2">
               Timezone (IANA)

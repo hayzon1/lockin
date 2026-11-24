@@ -11,6 +11,9 @@ export default function AuthPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [age, setAge] = useState('');
+  const [gender, setGender] = useState('');
   const [tokenInput, setTokenInput] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -60,9 +63,22 @@ export default function AuthPage() {
         if (password !== confirmPassword) {
           throw new Error('Passwords do not match');
         }
-        await register(email, password, confirmPassword);
-        setSuccessMessage('Registration successful! Please check your email (or server log) for the verification token.');
-        setIsRegister(false);
+        const parsedAge = age.trim() ? parseInt(age.trim(), 10) : undefined;
+        if (parsedAge !== undefined && (isNaN(parsedAge) || parsedAge < 1 || parsedAge > 120)) {
+          throw new Error('Please enter a valid age between 1 and 120');
+        }
+        const regUser = await register(
+          email,
+          password,
+          confirmPassword,
+          fullName.trim() || undefined,
+          parsedAge,
+          gender || undefined
+        );
+        if (!regUser.emailVerified) {
+          setSuccessMessage('Registration successful! Please check your email for the verification link.');
+          setIsRegister(false);
+        }
       } else {
         await login(email, password);
       }
@@ -209,22 +225,70 @@ export default function AuthPage() {
                 )}
 
                 {isRegister && (
-                  <div>
-                    <label className="block text-xs font-medium text-zinc-300 uppercase tracking-wider mb-1.5">
-                      Confirm Password
-                    </label>
-                    <div className="relative">
-                      <Lock className="w-4 h-4 text-zinc-500 absolute left-3.5 top-3.5" />
+                  <>
+                    <div>
+                      <label className="block text-xs font-medium text-zinc-300 uppercase tracking-wider mb-1.5">
+                        Confirm Password
+                      </label>
+                      <div className="relative">
+                        <Lock className="w-4 h-4 text-zinc-500 absolute left-3.5 top-3.5" />
+                        <input
+                          type="password"
+                          required
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          placeholder="••••••••"
+                          className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-zinc-300 uppercase tracking-wider mb-1.5">
+                        Full Name <span className="text-zinc-500 text-[10px] normal-case">(optional)</span>
+                      </label>
                       <input
-                        type="password"
-                        required
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        placeholder="••••••••"
-                        className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                        type="text"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        placeholder="Alex Morgan"
+                        className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                       />
                     </div>
-                  </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium text-zinc-300 uppercase tracking-wider mb-1.5">
+                          Age <span className="text-zinc-500 text-[10px] normal-case">(optional)</span>
+                        </label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="120"
+                          value={age}
+                          onChange={(e) => setAge(e.target.value)}
+                          placeholder="26"
+                          className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-zinc-300 uppercase tracking-wider mb-1.5">
+                          Gender <span className="text-zinc-500 text-[10px] normal-case">(optional)</span>
+                        </label>
+                        <select
+                          value={gender}
+                          onChange={(e) => setGender(e.target.value)}
+                          className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 transition-colors cursor-pointer"
+                        >
+                          <option value="">Select...</option>
+                          <option value="MALE">Male</option>
+                          <option value="FEMALE">Female</option>
+                          <option value="NON_BINARY">Non-Binary</option>
+                          <option value="PREFER_NOT_TO_SAY">Prefer not to say</option>
+                        </select>
+                      </div>
+                    </div>
+                  </>
                 )}
               </>
             )}

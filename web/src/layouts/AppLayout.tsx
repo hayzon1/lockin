@@ -1,23 +1,29 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Target, LayoutDashboard, Calendar, BarChart3, Settings, LogOut } from 'lucide-react';
+import { Target, LayoutDashboard, Calendar, BarChart3, Settings, LogOut, ShieldAlert } from 'lucide-react';
+
+export type TabId = 'dashboard' | 'periods' | 'calendar' | 'analytics' | 'settings' | 'admin';
 
 interface AppLayoutProps {
-  currentTab: 'dashboard' | 'periods' | 'calendar' | 'analytics' | 'settings';
-  setCurrentTab: (tab: 'dashboard' | 'periods' | 'calendar' | 'analytics' | 'settings') => void;
+  currentTab: TabId;
+  setCurrentTab: (tab: TabId) => void;
   children: React.ReactNode;
 }
 
 export default function AppLayout({ currentTab, setCurrentTab, children }: AppLayoutProps) {
   const { user, logout } = useAuth();
 
-  const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'periods', label: 'Periods', icon: Target },
-    { id: 'calendar', label: 'Calendar', icon: Calendar },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-    { id: 'settings', label: 'Settings', icon: Settings },
-  ] as const;
+  const baseNavItems = [
+    { id: 'dashboard' as const, label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'periods' as const, label: 'Periods', icon: Target },
+    { id: 'calendar' as const, label: 'Calendar', icon: Calendar },
+    { id: 'analytics' as const, label: 'Analytics', icon: BarChart3 },
+    { id: 'settings' as const, label: 'Settings', icon: Settings },
+  ];
+
+  const navItems = user?.role === 'ADMIN'
+    ? [...baseNavItems, { id: 'admin' as const, label: 'Admin', icon: ShieldAlert }]
+    : baseNavItems;
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col md:flex-row">

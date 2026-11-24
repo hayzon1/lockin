@@ -2,12 +2,18 @@ export type Theme = 'dark' | 'light' | 'system';
 
 export type PeriodStatus = 'ACTIVE' | 'COMPLETED' | 'ARCHIVED';
 
+export type UserRole = 'USER' | 'ADMIN';
+
 export interface User {
   id: string;
   email: string;
   emailVerified: boolean;
   timezone: string;
   theme: Theme;
+  fullName?: string | null;
+  age?: number | null;
+  gender?: string | null;
+  role: UserRole;
 }
 
 export interface SessionResponse {
@@ -128,4 +134,31 @@ export interface ApiResponse<T> {
   success: boolean;
   data: T;
   message: string | null;
+}
+
+export interface AdminStats {
+  totalUsers: number;
+  verifiedUsers: number;
+  totalPeriods: number;
+  activePeriods: number;
+  totalHabitCompletions: number;
+  overallPlatformCompletionPercentage: number | null;
+  genderDistribution: Record<string, number>;
+  averageAge: number | null;
+}
+
+export interface AdminUserItem {
+  id: string;
+  email: string;
+  fullName: string | null;
+  age: number | null;
+  gender: string | null;
+  role: UserRole;
+  emailVerified: boolean;
+  createdAt: string;
+  activePeriodName: string | null;
+  activePeriodDays: number | null;
+  totalHabitsCount: number;
+  totalCompletionsCount: number;
+  currentStreak: number;
 }

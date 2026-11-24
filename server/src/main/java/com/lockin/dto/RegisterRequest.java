@@ -17,12 +17,49 @@ public class RegisterRequest {
     @NotBlank(message = "Password confirmation is required")
     private String confirmPassword;
 
+    private String fullName;
+    private Integer age;
+    private String gender;
+
     public RegisterRequest() {}
 
     public RegisterRequest(String email, String password, String confirmPassword) {
         this.email = email;
         this.password = password;
         this.confirmPassword = confirmPassword;
+    }
+
+    public RegisterRequest(String email, String password, String confirmPassword, String fullName, Integer age, String gender) {
+        this.email = email;
+        this.password = password;
+        this.confirmPassword = confirmPassword;
+        this.fullName = fullName;
+        this.age = age;
+        this.gender = gender;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 
     public String getEmail() {

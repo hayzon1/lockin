@@ -1,5 +1,7 @@
 import axios from 'axios';
 import {
+  AdminStats,
+  AdminUserItem,
   ApiResponse,
   CalendarMonth,
   DailyChecklist,
@@ -40,7 +42,14 @@ export async function login(req: { email: string; password: string }): Promise<U
   return data.data;
 }
 
-export async function register(req: { email: string; password: string; confirmPassword: string }): Promise<User> {
+export async function register(req: {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  fullName?: string;
+  age?: number;
+  gender?: string;
+}): Promise<User> {
   const { data } = await api.post<ApiResponse<User>>('/auth/register', req);
   return data.data;
 }
@@ -182,6 +191,9 @@ export async function getCurrentUser(): Promise<User> {
 export async function updateUser(req: {
   timezone?: string;
   theme?: string;
+  fullName?: string;
+  age?: number;
+  gender?: string;
   currentPassword?: string;
   newPassword?: string;
 }): Promise<User> {
@@ -196,4 +208,19 @@ export async function exportUserData(): Promise<Blob> {
 
 export async function deleteAccount(password: string): Promise<void> {
   await api.delete('/users/me', { data: { password } });
+}
+
+// Admin
+export async function getAdminStats(): Promise<AdminStats> {
+  const { data } = await api.get<ApiResponse<AdminStats>>('/admin/stats');
+  return data.data;
+}
+
+export async function getAdminUsers(): Promise<AdminUserItem[]> {
+  const { data } = await api.get<ApiResponse<AdminUserItem[]>>('/admin/users');
+  return data.data;
+}
+
+export async function updateUserRole(userId: string, role: string): Promise<void> {
+  await api.patch(`/admin/users/${userId}/role`, { role });
 }

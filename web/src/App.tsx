@@ -8,6 +8,7 @@ import PeriodsPage from './pages/PeriodsPage';
 import CalendarPage from './pages/CalendarPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import SettingsPage from './pages/SettingsPage';
+import AdminPage from './pages/AdminPage';
 import { Target } from 'lucide-react';
 
 const queryClient = new QueryClient({
@@ -20,7 +21,7 @@ const queryClient = new QueryClient({
   },
 });
 
-type NavTab = 'dashboard' | 'periods' | 'calendar' | 'analytics' | 'settings';
+type NavTab = 'dashboard' | 'periods' | 'calendar' | 'analytics' | 'settings' | 'admin';
 
 function MainApp() {
   const { user, loading } = useAuth();
@@ -50,6 +51,7 @@ function MainApp() {
       {currentTab === 'calendar' && <CalendarPage />}
       {currentTab === 'analytics' && <AnalyticsPage />}
       {currentTab === 'settings' && <SettingsPage />}
+      {currentTab === 'admin' && <AdminPage />}
     </AppLayout>
   );
 }

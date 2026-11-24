@@ -87,6 +87,16 @@ public class UserService {
             preferences.setTheme(theme);
         }
 
+        if (request.getFullName() != null) {
+            user.setFullName(request.getFullName().trim().isEmpty() ? null : request.getFullName().trim());
+        }
+        if (request.getAge() != null) {
+            user.setAge(request.getAge());
+        }
+        if (request.getGender() != null) {
+            user.setGender(request.getGender().trim().isEmpty() ? null : request.getGender().trim());
+        }
+
         if (request.getNewPassword() != null && !request.getNewPassword().trim().isEmpty()) {
             if (request.getCurrentPassword() == null || request.getCurrentPassword().trim().isEmpty()) {
                 throw new AppException("Current password is required to set a new password", HttpStatus.BAD_REQUEST);
@@ -167,6 +177,16 @@ public class UserService {
     private UserDto toDto(UserEntity user, UserPreferencesEntity preferences) {
         String timezone = preferences != null ? preferences.getTimezone() : "UTC";
         String theme = preferences != null ? preferences.getTheme() : "dark";
-        return new UserDto(user.getId(), user.getEmail(), user.isEmailVerified(), timezone, theme);
+        return new UserDto(
+                user.getId(),
+                user.getEmail(),
+                user.isEmailVerified(),
+                timezone,
+                theme,
+                user.getFullName(),
+                user.getAge(),
+                user.getGender(),
+                user.getRole()
+        );
     }
 }

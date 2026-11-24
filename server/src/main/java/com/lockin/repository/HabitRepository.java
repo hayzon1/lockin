@@ -13,5 +13,7 @@ public interface HabitRepository extends JpaRepository<HabitEntity, UUID> {
 
     List<HabitEntity> findByPeriodIdAndUserIdOrderByDisplayOrderAsc(UUID periodId, UUID userId);
 
+    List<HabitEntity> findByUserId(UUID userId);
+
     Optional<HabitEntity> findByIdAndUserId(UUID id, UUID userId);
 }
