@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import AppLayout from './layouts/AppLayout';
 import AuthPage from './pages/AuthPage';
 import DashboardPage from './pages/DashboardPage';
@@ -29,8 +30,8 @@ function MainApp() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center">
-        <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-400 mb-4 animate-pulse">
+      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex flex-col items-center justify-center transition-colors">
+        <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-600 dark:text-emerald-400 mb-4 animate-pulse">
           <Target className="w-8 h-8" />
         </div>
         <p className="text-xs text-zinc-500 font-mono tracking-wider uppercase">Loading LOCKIN...</p>
@@ -60,7 +61,9 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <MainApp />
+        <ThemeProvider>
+          <MainApp />
+        </ThemeProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
