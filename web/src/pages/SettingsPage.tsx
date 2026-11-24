@@ -196,8 +196,8 @@ export default function SettingsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
           <div>
             <span className="text-zinc-500 block mb-1">Email Address</span>
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-zinc-800 dark:text-zinc-200 text-sm">{user?.email}</span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-mono text-zinc-800 dark:text-zinc-200 text-sm break-all">{user?.email}</span>
               {user?.emailVerified ? (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
                   <CheckCircle2 className="w-3 h-3" /> Verified
@@ -413,7 +413,7 @@ export default function SettingsPage() {
 
       {/* Data Portability */}
       <div className="p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 shadow-sm dark:shadow-none">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div>
             <h3 className="text-base font-semibold text-zinc-900 dark:text-white mb-1 flex items-center gap-2">
               <Download className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
@@ -427,7 +427,7 @@ export default function SettingsPage() {
           <button
             onClick={handleExportData}
             disabled={exportLoading}
-            className="flex items-center gap-2 px-4 py-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 border border-zinc-300 dark:border-zinc-700 rounded-xl text-xs font-medium text-zinc-800 dark:text-zinc-200 transition-colors shrink-0 cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 border border-zinc-300 dark:border-zinc-700 rounded-xl text-xs font-medium text-zinc-800 dark:text-zinc-200 transition-colors shrink-0 self-start cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
             <span>{exportLoading ? 'Exporting...' : 'Export JSON'}</span>
@@ -437,7 +437,7 @@ export default function SettingsPage() {
 
       {/* Danger Zone */}
       <div className="p-6 rounded-2xl border border-rose-200 dark:border-rose-900/30 bg-rose-50/70 dark:bg-rose-950/10">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div>
             <h3 className="text-base font-semibold text-rose-600 dark:text-rose-400 flex items-center gap-2">
               <AlertTriangle className="w-4 h-4" />
@@ -454,7 +454,7 @@ export default function SettingsPage() {
               setDeleteError(null);
               setDeletePassword('');
             }}
-            className="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 rounded-xl text-xs font-medium text-rose-600 dark:text-rose-400 transition-colors shrink-0 cursor-pointer"
+            className="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 rounded-xl text-xs font-medium text-rose-600 dark:text-rose-400 transition-colors shrink-0 self-start cursor-pointer"
           >
             Delete Account
           </button>

@@ -101,8 +101,8 @@ export default function CalendarPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Calendar Grid (2 Cols) */}
-        <div className="lg:col-span-2 bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 sm:p-6 shadow-sm dark:shadow-none backdrop-blur-md">
-          <div className="grid grid-cols-7 gap-2 mb-2 text-center text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">
+        <div className="lg:col-span-2 bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 sm:p-6 shadow-sm dark:shadow-none backdrop-blur-md">
+          <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-center text-[10px] sm:text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">
             <span>Sun</span>
             <span>Mon</span>
             <span>Tue</span>
@@ -115,20 +115,20 @@ export default function CalendarPage() {
           {isLoading ? (
             <div className="py-16 text-center text-xs text-zinc-500">Loading calendar...</div>
           ) : (
-            <div className="grid grid-cols-7 gap-2">
+            <div className="grid grid-cols-7 gap-1 sm:gap-2">
               {calendarData?.days.map((day) => {
                 const isSelected = selectedDate === day.date;
                 return (
                   <button
                     key={day.date}
                     onClick={() => setSelectedDate(day.date)}
-                    className={`aspect-square p-2 rounded-xl border flex flex-col justify-between transition-all cursor-pointer ${
+                    className={`aspect-square p-1 sm:p-2 rounded-lg sm:rounded-xl border flex flex-col justify-between transition-all cursor-pointer overflow-hidden ${
                       getIntensityColor(day.intensity, day.inPeriod, day.future)
-                    } ${isSelected ? 'ring-2 ring-emerald-500 dark:ring-emerald-400 ring-offset-2 ring-offset-white dark:ring-offset-zinc-950 scale-105 z-10' : ''}`}
+                    } ${isSelected ? 'ring-2 ring-emerald-500 dark:ring-emerald-400 ring-offset-1 sm:ring-offset-2 ring-offset-white dark:ring-offset-zinc-950 scale-105 z-10' : ''}`}
                   >
-                    <span className="text-xs font-semibold">{day.dayOfMonth}</span>
+                    <span className="text-[11px] sm:text-xs font-semibold leading-none">{day.dayOfMonth}</span>
                     {day.inPeriod && !day.future && (
-                      <span className="text-[10px] opacity-80 text-right">
+                      <span className="text-[8px] sm:text-[10px] leading-none opacity-80 text-right truncate">
                         {day.completionPercentage !== null ? `${Math.round(day.completionPercentage)}%` : ''}
                       </span>
                     )}
@@ -139,7 +139,7 @@ export default function CalendarPage() {
           )}
 
           {/* Intensity Legend */}
-          <div className="flex items-center justify-between text-xs text-zinc-500 mt-6 pt-4 border-t border-zinc-200 dark:border-zinc-800/80">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] sm:text-xs text-zinc-500 mt-6 pt-4 border-t border-zinc-200 dark:border-zinc-800/80">
             <span>Less consistent</span>
             <div className="flex items-center gap-1.5">
               <span className="w-3.5 h-3.5 rounded bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800" />

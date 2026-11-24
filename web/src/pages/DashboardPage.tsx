@@ -217,9 +217,9 @@ export default function DashboardPage({ onNavigateToPeriods }: DashboardPageProp
         {/* Left 2 Cols: Daily Checklist */}
         <div className="lg:col-span-2 space-y-4">
           <div className="bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 sm:p-6 shadow-sm dark:shadow-none backdrop-blur-md">
-            <div className="flex items-center justify-between pb-4 border-b border-zinc-200 dark:border-zinc-800/80 mb-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-zinc-200 dark:border-zinc-800/80 mb-4">
               <div>
-                <h3 className="text-base font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+                <h3 className="text-base font-bold text-zinc-900 dark:text-white flex flex-wrap items-center gap-x-2 gap-y-0.5">
                   <span>Today's Checklist</span>
                   <span className="text-xs text-zinc-500 dark:text-zinc-400 font-normal">
                     ({checklist?.dayOfWeek}, {checklist?.date})
@@ -307,7 +307,7 @@ export default function DashboardPage({ onNavigateToPeriods }: DashboardPageProp
             {/* Quick Add Habit form */}
             <div className="mt-5 pt-4 border-t border-zinc-200 dark:border-zinc-800/80">
               {isAddingHabit ? (
-                <form onSubmit={handleCreateHabitSubmit} className="flex gap-2">
+                <form onSubmit={handleCreateHabitSubmit} className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="text"
                     required
@@ -317,20 +317,22 @@ export default function DashboardPage({ onNavigateToPeriods }: DashboardPageProp
                     onChange={(e) => setNewHabitName(e.target.value)}
                     className="flex-1 bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3.5 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   />
-                  <button
-                    type="submit"
-                    disabled={addHabitMutation.isPending}
-                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 dark:bg-emerald-500 dark:hover:bg-emerald-400 text-white dark:text-zinc-950 text-xs font-semibold rounded-xl cursor-pointer"
-                  >
-                    Save
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setIsAddingHabit(false); setNewHabitName(''); }}
-                    className="px-3 py-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-xs font-medium rounded-xl cursor-pointer"
-                  >
-                    Cancel
-                  </button>
+                  <div className="flex gap-2 shrink-0">
+                    <button
+                      type="submit"
+                      disabled={addHabitMutation.isPending}
+                      className="flex-1 sm:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-500 dark:bg-emerald-500 dark:hover:bg-emerald-400 text-white dark:text-zinc-950 text-xs font-semibold rounded-xl cursor-pointer"
+                    >
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setIsAddingHabit(false); setNewHabitName(''); }}
+                      className="flex-1 sm:flex-none px-3 py-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-xs font-medium rounded-xl cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </form>
               ) : (
                 <button
@@ -421,7 +423,7 @@ export default function DashboardPage({ onNavigateToPeriods }: DashboardPageProp
             </p>
           </div>
 
-          <div className="inline-flex rounded-xl bg-zinc-100 dark:bg-zinc-950 p-1 border border-zinc-200 dark:border-zinc-800 shrink-0">
+          <div className="inline-flex self-start sm:self-auto rounded-xl bg-zinc-100 dark:bg-zinc-950 p-1 border border-zinc-200 dark:border-zinc-800 shrink-0">
             <button
               type="button"
               onClick={() => setChartMode('percentage')}

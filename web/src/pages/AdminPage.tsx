@@ -181,26 +181,26 @@ export default function AdminPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
             {/* Search */}
-            <div className="relative">
+            <div className="relative flex-1 sm:flex-none">
               <Search className="w-4 h-4 text-zinc-400 dark:text-zinc-500 absolute left-3 top-2.5" />
               <input
                 type="text"
                 placeholder="Search email or name..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-300 dark:border-zinc-800 rounded-xl pl-9 pr-3.5 py-2 text-xs text-zinc-900 dark:text-zinc-200 placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-purple-500 w-48 sm:w-60"
+                className="bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-300 dark:border-zinc-800 rounded-xl pl-9 pr-3.5 py-2 text-xs text-zinc-900 dark:text-zinc-200 placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-purple-500 w-full sm:w-60"
               />
             </div>
 
             {/* Role Filter */}
-            <div className="flex items-center gap-1.5 bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-300 dark:border-zinc-800 rounded-xl px-2.5 py-1.5">
-              <Filter className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500" />
+            <div className="flex items-center gap-1.5 bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-300 dark:border-zinc-800 rounded-xl px-2.5 py-2 sm:py-1.5">
+              <Filter className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500 shrink-0" />
               <select
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value as 'ALL' | 'ADMIN' | 'USER')}
-                className="bg-transparent text-xs text-zinc-700 dark:text-zinc-300 focus:outline-none cursor-pointer"
+                className="bg-transparent text-xs text-zinc-700 dark:text-zinc-300 focus:outline-none cursor-pointer w-full sm:w-auto"
               >
                 <option value="ALL">All Roles</option>
                 <option value="ADMIN">Admins</option>

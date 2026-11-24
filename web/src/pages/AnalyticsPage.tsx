@@ -81,7 +81,7 @@ export default function AnalyticsPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <label htmlFor="period-select" className="text-xs text-zinc-500 dark:text-zinc-400 shrink-0">
             Period:
           </label>
@@ -89,7 +89,7 @@ export default function AnalyticsPage() {
             id="period-select"
             value={currentPeriodId || ''}
             onChange={(e) => setSelectedPeriodId(e.target.value)}
-            className="bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700/80 text-zinc-800 dark:text-zinc-200 text-xs rounded-xl px-3 py-2 focus:ring-1 focus:ring-emerald-500 focus:outline-none cursor-pointer"
+            className="flex-1 sm:flex-none bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700/80 text-zinc-800 dark:text-zinc-200 text-xs rounded-xl px-3 py-2 focus:ring-1 focus:ring-emerald-500 focus:outline-none cursor-pointer min-w-0"
           >
             {periods.map((p) => (
               <option key={p.id} value={p.id}>
@@ -199,9 +199,9 @@ export default function AnalyticsPage() {
                       key={habit.habitId}
                       className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/70 hover:border-zinc-300 dark:hover:border-zinc-700/70 transition-colors"
                     >
-                      <div className="flex items-center justify-between gap-4 mb-2">
+                      <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4 mb-2">
                         <div className="min-w-0">
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
                             <span className="font-semibold text-sm text-zinc-900 dark:text-zinc-100 truncate">
                               {habit.name}
                             </span>
@@ -216,12 +216,12 @@ export default function AnalyticsPage() {
                           </p>
                         </div>
 
-                        <div className="flex items-center gap-4 shrink-0">
+                        <div className="flex items-center gap-3 sm:gap-4 shrink-0">
                           <div className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 font-medium">
                             <Flame className="w-3.5 h-3.5" />
                             <span>{habit.currentStreak}d streak</span>
                           </div>
-                          <span className="font-mono text-sm font-bold text-zinc-900 dark:text-white w-14 text-right">
+                          <span className="font-mono text-sm font-bold text-zinc-900 dark:text-white w-12 sm:w-14 text-right">
                             {habit.completionPercentage !== null
                               ? `${habit.completionPercentage.toFixed(0)}%`
                               : '0%'}
