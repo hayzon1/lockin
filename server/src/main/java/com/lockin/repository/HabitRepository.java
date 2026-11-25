@@ -15,5 +15,7 @@ public interface HabitRepository extends JpaRepository<HabitEntity, UUID> {
 
     List<HabitEntity> findByUserId(UUID userId);
 
+    List<HabitEntity> findByGoalIdAndUserId(UUID goalId, UUID userId);
+
     Optional<HabitEntity> findByIdAndUserId(UUID id, UUID userId);
 }

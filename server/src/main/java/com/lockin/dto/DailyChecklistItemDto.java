@@ -11,6 +11,10 @@ public class DailyChecklistItemDto {
     private int displayOrder;
     private boolean completed;
     private Instant completedAt;
+    private UUID goalId;
+    private String goalTitle;
+    private String twoMinuteVersion;
+    private String habitStackCue;
 
     public DailyChecklistItemDto() {}
 
@@ -23,6 +27,22 @@ public class DailyChecklistItemDto {
             boolean completed,
             Instant completedAt
     ) {
+        this(habitId, name, description, category, displayOrder, completed, completedAt, null, null, null, null);
+    }
+
+    public DailyChecklistItemDto(
+            UUID habitId,
+            String name,
+            String description,
+            String category,
+            int displayOrder,
+            boolean completed,
+            Instant completedAt,
+            UUID goalId,
+            String goalTitle,
+            String twoMinuteVersion,
+            String habitStackCue
+    ) {
         this.habitId = habitId;
         this.name = name;
         this.description = description;
@@ -30,6 +50,10 @@ public class DailyChecklistItemDto {
         this.displayOrder = displayOrder;
         this.completed = completed;
         this.completedAt = completedAt;
+        this.goalId = goalId;
+        this.goalTitle = goalTitle;
+        this.twoMinuteVersion = twoMinuteVersion;
+        this.habitStackCue = habitStackCue;
     }
 
     public UUID getHabitId() {
@@ -86,5 +110,37 @@ public class DailyChecklistItemDto {
 
     public void setCompletedAt(Instant completedAt) {
         this.completedAt = completedAt;
+    }
+
+    public UUID getGoalId() {
+        return goalId;
+    }
+
+    public void setGoalId(UUID goalId) {
+        this.goalId = goalId;
+    }
+
+    public String getGoalTitle() {
+        return goalTitle;
+    }
+
+    public void setGoalTitle(String goalTitle) {
+        this.goalTitle = goalTitle;
+    }
+
+    public String getTwoMinuteVersion() {
+        return twoMinuteVersion;
+    }
+
+    public void setTwoMinuteVersion(String twoMinuteVersion) {
+        this.twoMinuteVersion = twoMinuteVersion;
+    }
+
+    public String getHabitStackCue() {
+        return habitStackCue;
+    }
+
+    public void setHabitStackCue(String habitStackCue) {
+        this.habitStackCue = habitStackCue;
     }
 }

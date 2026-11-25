@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import {
   Target,
+  Compass,
   LayoutDashboard,
   Calendar,
   BarChart3,
@@ -13,7 +14,7 @@ import {
   Moon,
 } from 'lucide-react';
 
-export type TabId = 'dashboard' | 'periods' | 'calendar' | 'analytics' | 'settings' | 'admin';
+export type TabId = 'dashboard' | 'goals' | 'periods' | 'calendar' | 'analytics' | 'settings' | 'admin';
 
 interface AppLayoutProps {
   currentTab: TabId;
@@ -32,6 +33,7 @@ export default function AppLayout({ currentTab, setCurrentTab, children }: AppLa
 
   const baseNavItems = [
     { id: 'dashboard' as const, label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'goals' as const, label: 'Goals', icon: Compass },
     { id: 'periods' as const, label: 'Periods', icon: Target },
     { id: 'calendar' as const, label: 'Calendar', icon: Calendar },
     { id: 'analytics' as const, label: 'Analytics', icon: BarChart3 },

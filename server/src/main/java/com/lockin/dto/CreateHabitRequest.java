@@ -18,6 +18,12 @@ public class CreateHabitRequest {
 
     private LocalDate effectiveStartDate;
 
+    @Size(max = 255, message = "Two-minute version cannot exceed 255 characters")
+    private String twoMinuteVersion;
+
+    @Size(max = 255, message = "Habit stack cue cannot exceed 255 characters")
+    private String habitStackCue;
+
     public CreateHabitRequest() {}
 
     public CreateHabitRequest(String name, String description, String category, LocalDate effectiveStartDate) {
@@ -57,5 +63,21 @@ public class CreateHabitRequest {
 
     public void setEffectiveStartDate(LocalDate effectiveStartDate) {
         this.effectiveStartDate = effectiveStartDate;
+    }
+
+    public String getTwoMinuteVersion() {
+        return twoMinuteVersion;
+    }
+
+    public void setTwoMinuteVersion(String twoMinuteVersion) {
+        this.twoMinuteVersion = twoMinuteVersion;
+    }
+
+    public String getHabitStackCue() {
+        return habitStackCue;
+    }
+
+    public void setHabitStackCue(String habitStackCue) {
+        this.habitStackCue = habitStackCue;
     }
 }

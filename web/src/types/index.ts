@@ -29,6 +29,10 @@ export interface Habit {
   displayOrder: number;
   effectiveStartDate: string;
   archived: boolean;
+  goalId?: string | null;
+  goalTitle?: string | null;
+  twoMinuteVersion?: string | null;
+  habitStackCue?: string | null;
 }
 
 export interface TrackingPeriod {
@@ -54,6 +58,10 @@ export interface DailyChecklistItem {
   displayOrder: number;
   completed: boolean;
   completedAt: string | null;
+  goalId?: string | null;
+  goalTitle?: string | null;
+  twoMinuteVersion?: string | null;
+  habitStackCue?: string | null;
 }
 
 export interface DailyChecklist {
@@ -161,4 +169,52 @@ export interface AdminUserItem {
   totalHabitsCount: number;
   totalCompletionsCount: number;
   currentStreak: number;
+}
+
+export type GoalStatus = 'ACTIVE' | 'COMPLETED' | 'ARCHIVED';
+
+export interface GoalMilestone {
+  id: string;
+  title: string;
+  description: string | null;
+  targetDate: string | null;
+  displayOrder: number;
+  completed: boolean;
+  completedAt: string | null;
+}
+
+export interface GoalSuggestedHabit {
+  id: string;
+  name: string;
+  twoMinuteVersion: string | null;
+  habitStackCue: string | null;
+  category: string | null;
+  whyItWorks: string | null;
+  displayOrder: number;
+  adopted: boolean;
+}
+
+export interface LongTermGoal {
+  id: string;
+  title: string;
+  description: string | null;
+  category: string;
+  identityStatement: string | null;
+  targetDate: string;
+  daysRemaining: number;
+  status: GoalStatus;
+  aiProvider: 'GEMINI' | 'BUILT_IN' | string;
+  roadmapSummary: string | null;
+  milestones: GoalMilestone[];
+  suggestedHabits: GoalSuggestedHabit[];
+  linkedHabitsCount: number;
+  identityVotesCount: number;
+  progressPercentage: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CoachStatus {
+  aiEnabled: boolean;
+  activeProvider: 'GEMINI' | 'BUILT_IN';
 }

@@ -93,7 +93,11 @@ public class DailyTrackingService {
                         h.getCategory(),
                         h.getDisplayOrder(),
                         completionMap.containsKey(h.getId()),
-                        completionMap.get(h.getId())
+                        completionMap.get(h.getId()),
+                        h.getGoal() != null ? h.getGoal().getId() : null,
+                        h.getGoal() != null ? h.getGoal().getTitle() : null,
+                        h.getTwoMinuteVersion(),
+                        h.getHabitStackCue()
                 ))
                 .toList();
 

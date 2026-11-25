@@ -13,6 +13,9 @@ import {
   CalendarDays,
   Target,
   ArrowRight,
+  Zap,
+  Link2,
+  Compass,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -31,6 +34,7 @@ export default function DashboardPage({ onNavigateToPeriods }: DashboardPageProp
   const queryClient = useQueryClient();
   const { resolvedTheme } = useTheme();
   const [chartMode, setChartMode] = useState<'count' | 'percentage'>('percentage');
+  const [twoMinMode, setTwoMinMode] = useState(false);
   const [newHabitName, setNewHabitName] = useState('');
   const [isAddingHabit, setIsAddingHabit] = useState(false);
 
@@ -69,6 +73,7 @@ export default function DashboardPage({ onNavigateToPeriods }: DashboardPageProp
       queryClient.setQueryData(['dailyChecklist'], updatedChecklist);
       queryClient.invalidateQueries({ queryKey: ['growthTrajectory'] });
       queryClient.invalidateQueries({ queryKey: ['periodOverview'] });
+      queryClient.invalidateQueries({ queryKey: ['goals'] });
 
       // Trigger celebratory confetti if 100% completed
       if (
@@ -93,6 +98,7 @@ export default function DashboardPage({ onNavigateToPeriods }: DashboardPageProp
       queryClient.setQueryData(['dailyChecklist'], updatedChecklist);
       queryClient.invalidateQueries({ queryKey: ['growthTrajectory'] });
       queryClient.invalidateQueries({ queryKey: ['periodOverview'] });
+      queryClient.invalidateQueries({ queryKey: ['goals'] });
     },
   });
 
@@ -230,18 +236,36 @@ export default function DashboardPage({ onNavigateToPeriods }: DashboardPageProp
                 </p>
               </div>
 
-              {checklist && (
-                <div className="text-right">
-                  <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                    {checklist.completedCount} of {checklist.eligibleCount} done
+              <div className="flex items-center gap-3">
+                {checklist?.habits.some((h) => h.twoMinuteVersion) && (
+                  <button
+                    type="button"
+                    onClick={() => setTwoMinMode(!twoMinMode)}
+                    title="Low-energy day? Switch to 2-Minute Fallback mode to show up and protect your streak."
+                    className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border transition-colors cursor-pointer ${
+                      twoMinMode
+                        ? 'bg-amber-500/15 border-amber-500/40 text-amber-700 dark:text-amber-300'
+                        : 'bg-zinc-100 dark:bg-zinc-800/80 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:border-amber-500/40'
+                    }`}
+                  >
+                    <Zap className="w-3.5 h-3.5 text-amber-500" />
+                    <span>{twoMinMode ? '2-Min Mode ON' : 'Low Energy?'}</span>
+                  </button>
+                )}
+
+                {checklist && (
+                  <div className="text-right">
+                    <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                      {checklist.completedCount} of {checklist.eligibleCount} done
+                    </div>
+                    <div className="text-[11px] text-zinc-500">
+                      {checklist.completionPercentage !== null
+                        ? `${checklist.completionPercentage}% achieved`
+                        : 'No habits active'}
+                    </div>
                   </div>
-                  <div className="text-[11px] text-zinc-500">
-                    {checklist.completionPercentage !== null
-                      ? `${checklist.completionPercentage}% achieved`
-                      : 'No habits active'}
-                  </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             {checklistLoading ? (
@@ -271,25 +295,54 @@ export default function DashboardPage({ onNavigateToPeriods }: DashboardPageProp
                       ) : (
                         <Circle className="w-5 h-5 text-zinc-400 dark:text-zinc-600 hover:text-zinc-600 dark:hover:text-zinc-400 shrink-0" />
                       )}
-                      <div className="truncate">
-                        <span
-                          className={`text-sm font-medium ${
-                            item.completed
-                              ? 'line-through text-zinc-400'
-                              : 'text-zinc-900 dark:text-zinc-100'
-                          }`}
-                        >
-                          {item.name}
-                        </span>
-                        {item.category && (
-                          <span className="ml-2.5 inline-block text-[10px] px-2 py-0.5 rounded-full bg-zinc-200/70 dark:bg-zinc-800/80 text-zinc-600 dark:text-zinc-400 border border-zinc-300/60 dark:border-zinc-700/40">
-                            {item.category}
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span
+                            className={`text-sm font-medium ${
+                              item.completed
+                                ? 'line-through text-zinc-400'
+                                : 'text-zinc-900 dark:text-zinc-100'
+                            }`}
+                          >
+                            {twoMinMode && item.twoMinuteVersion ? item.twoMinuteVersion : item.name}
                           </span>
-                        )}
-                        {item.description && (
-                          <p className="text-xs text-zinc-500 truncate mt-0.5">
-                            {item.description}
+                          {item.category && (
+                            <span className="inline-block text-[10px] px-2 py-0.5 rounded-full bg-zinc-200/70 dark:bg-zinc-800/80 text-zinc-600 dark:text-zinc-400 border border-zinc-300/60 dark:border-zinc-700/40">
+                              {item.category}
+                            </span>
+                          )}
+                          {item.goalTitle && (
+                            <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+                              <Compass className="w-2.5 h-2.5" />
+                              <span className="truncate max-w-[140px]">{item.goalTitle}</span>
+                            </span>
+                          )}
+                        </div>
+                        {twoMinMode && item.twoMinuteVersion ? (
+                          <p className="text-[11px] text-amber-700 dark:text-amber-300 mt-1 flex items-center gap-1">
+                            <Zap className="w-3 h-3 shrink-0" />
+                            <span>2-min fallback for: {item.name}</span>
                           </p>
+                        ) : (
+                          <>
+                            {item.twoMinuteVersion && (
+                              <p className="text-[11px] text-amber-700/90 dark:text-amber-400/90 mt-1 flex items-start gap-1">
+                                <Zap className="w-3 h-3 shrink-0 mt-0.5" />
+                                <span>2-min fallback: {item.twoMinuteVersion}</span>
+                              </p>
+                            )}
+                            {item.habitStackCue && (
+                              <p className="text-[11px] text-sky-700/90 dark:text-sky-400/90 mt-0.5 flex items-start gap-1">
+                                <Link2 className="w-3 h-3 shrink-0 mt-0.5" />
+                                <span>{item.habitStackCue}</span>
+                              </p>
+                            )}
+                            {!item.twoMinuteVersion && item.description && (
+                              <p className="text-xs text-zinc-500 truncate mt-0.5">
+                                {item.description}
+                              </p>
+                            )}
+                          </>
                         )}
                       </div>
                     </div>

@@ -38,3 +38,6 @@ app:
     admin-emails: ${ADMIN_EMAILS:azon1129@gmail.com,admin@lockin.app}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
+  ai:
+    gemini-api-key: ${GEMINI_API_KEY:}
+    gemini-model: ${GEMINI_MODEL:gemini-2.5-flash}

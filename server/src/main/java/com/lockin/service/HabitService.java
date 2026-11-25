@@ -72,6 +72,8 @@ public class HabitService {
         );
         habit.setDescription(request.getDescription() != null ? request.getDescription().trim() : null);
         habit.setCategory(request.getCategory() != null ? request.getCategory().trim() : null);
+        habit.setTwoMinuteVersion(request.getTwoMinuteVersion() != null && !request.getTwoMinuteVersion().isBlank() ? request.getTwoMinuteVersion().trim() : null);
+        habit.setHabitStackCue(request.getHabitStackCue() != null && !request.getHabitStackCue().isBlank() ? request.getHabitStackCue().trim() : null);
 
         HabitEntity saved = habitRepository.save(habit);
         return toDto(saved);
@@ -158,7 +160,11 @@ public class HabitService {
                 entity.getCategory(),
                 entity.getDisplayOrder(),
                 entity.getEffectiveStartDate(),
-                entity.isArchived()
+                entity.isArchived(),
+                entity.getGoal() != null ? entity.getGoal().getId() : null,
+                entity.getGoal() != null ? entity.getGoal().getTitle() : null,
+                entity.getTwoMinuteVersion(),
+                entity.getHabitStackCue()
         );
     }
 }

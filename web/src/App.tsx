@@ -5,6 +5,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import AppLayout from './layouts/AppLayout';
 import AuthPage from './pages/AuthPage';
 import DashboardPage from './pages/DashboardPage';
+import GoalsPage from './pages/GoalsPage';
 import PeriodsPage from './pages/PeriodsPage';
 import CalendarPage from './pages/CalendarPage';
 import AnalyticsPage from './pages/AnalyticsPage';
@@ -22,7 +23,7 @@ const queryClient = new QueryClient({
   },
 });
 
-type NavTab = 'dashboard' | 'periods' | 'calendar' | 'analytics' | 'settings' | 'admin';
+type NavTab = 'dashboard' | 'goals' | 'periods' | 'calendar' | 'analytics' | 'settings' | 'admin';
 
 function MainApp() {
   const { user, loading } = useAuth();
@@ -47,6 +48,9 @@ function MainApp() {
     <AppLayout currentTab={currentTab} setCurrentTab={setCurrentTab}>
       {currentTab === 'dashboard' && (
         <DashboardPage onNavigateToPeriods={() => setCurrentTab('periods')} />
+      )}
+      {currentTab === 'goals' && (
+        <GoalsPage onNavigateToDashboard={() => setCurrentTab('dashboard')} />
       )}
       {currentTab === 'periods' && <PeriodsPage />}
       {currentTab === 'calendar' && <CalendarPage />}
