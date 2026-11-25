@@ -43,7 +43,13 @@ public class SecurityConfig {
     ) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.objectMapper = objectMapper;
-        this.allowedOrigins = Arrays.asList(allowedOriginsStr.split(","));
+        this.allowedOrigins = Arrays.stream(allowedOriginsStr.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .map(origin -> (origin.startsWith("http://") || origin.startsWith("https://"))
+                        ? origin.replaceAll("/+$", "")
+                        : "https://" + origin.replaceAll("/+$", ""))
+                .toList();
     }
 
     @Bean
@@ -73,7 +79,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/actuator/health").permitAll()
+                        .requestMatchers("/api/v1/health", "/actuator/health").permitAll()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
