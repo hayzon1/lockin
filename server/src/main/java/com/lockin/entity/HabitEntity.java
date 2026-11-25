@@ -21,6 +21,10 @@ public class HabitEntity {
     @JoinColumn(name = "period_id", nullable = false)
     private TrackingPeriodEntity period;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "goal_id")
+    private LongTermGoalEntity goal;
+
     @Column(nullable = false, length = 128)
     private String name;
 
@@ -29,6 +33,12 @@ public class HabitEntity {
 
     @Column(length = 64)
     private String category;
+
+    @Column(name = "two_minute_version", length = 255)
+    private String twoMinuteVersion;
+
+    @Column(name = "habit_stack_cue", length = 255)
+    private String habitStackCue;
 
     @Column(name = "display_order", nullable = false)
     private int displayOrder = 0;
@@ -148,5 +158,29 @@ public class HabitEntity {
 
     public Instant getUpdatedAt() {
         return updatedAt;
+    }
+
+    public LongTermGoalEntity getGoal() {
+        return goal;
+    }
+
+    public void setGoal(LongTermGoalEntity goal) {
+        this.goal = goal;
+    }
+
+    public String getTwoMinuteVersion() {
+        return twoMinuteVersion;
+    }
+
+    public void setTwoMinuteVersion(String twoMinuteVersion) {
+        this.twoMinuteVersion = twoMinuteVersion;
+    }
+
+    public String getHabitStackCue() {
+        return habitStackCue;
+    }
+
+    public void setHabitStackCue(String habitStackCue) {
+        this.habitStackCue = habitStackCue;
     }
 }

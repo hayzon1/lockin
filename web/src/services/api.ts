@@ -1,12 +1,16 @@
 import axios from 'axios';
 import {
+  AdminStats,
+  AdminUserItem,
   ApiResponse,
   CalendarMonth,
+  CoachStatus,
   DailyChecklist,
   GrowthPoint,
   Habit,
   HabitAnalytics,
   Insight,
+  LongTermGoal,
   PeriodOverviewAnalytics,
   SessionResponse,
   TrackingPeriod,
@@ -40,7 +44,14 @@ export async function login(req: { email: string; password: string }): Promise<U
   return data.data;
 }
 
-export async function register(req: { email: string; password: string; confirmPassword: string }): Promise<User> {
+export async function register(req: {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  fullName?: string;
+  age?: number;
+  gender?: string;
+}): Promise<User> {
   const { data } = await api.post<ApiResponse<User>>('/auth/register', req);
   return data.data;
 }
@@ -182,6 +193,9 @@ export async function getCurrentUser(): Promise<User> {
 export async function updateUser(req: {
   timezone?: string;
   theme?: string;
+  fullName?: string;
+  age?: number;
+  gender?: string;
   currentPassword?: string;
   newPassword?: string;
 }): Promise<User> {
@@ -196,4 +210,84 @@ export async function exportUserData(): Promise<Blob> {
 
 export async function deleteAccount(password: string): Promise<void> {
   await api.delete('/users/me', { data: { password } });
+}
+
+// Admin
+export async function getAdminStats(): Promise<AdminStats> {
+  const { data } = await api.get<ApiResponse<AdminStats>>('/admin/stats');
+  return data.data;
+}
+
+export async function getAdminUsers(): Promise<AdminUserItem[]> {
+  const { data } = await api.get<ApiResponse<AdminUserItem[]>>('/admin/users');
+  return data.data;
+}
+
+export async function updateUserRole(userId: string, role: string): Promise<void> {
+  await api.patch(`/admin/users/${userId}/role`, { role });
+}
+
+// Long-Term Goals & Atomic Habits Coach
+export async function getCoachStatus(): Promise<CoachStatus> {
+  const { data } = await api.get<ApiResponse<CoachStatus>>('/goals/coach-status');
+  return data.data;
+}
+
+export async function getGoals(): Promise<LongTermGoal[]> {
+  const { data } = await api.get<ApiResponse<LongTermGoal[]>>('/goals');
+  return data.data;
+}
+
+export async function createGoal(req: {
+  title: string;
+  description?: string;
+  category?: string;
+  identityStatement?: string;
+  targetDate: string;
+}): Promise<LongTermGoal> {
+  const { data } = await api.post<ApiResponse<LongTermGoal>>('/goals', req);
+  return data.data;
+}
+
+export async function regenerateGoalBlueprint(goalId: string): Promise<LongTermGoal> {
+  const { data } = await api.post<ApiResponse<LongTermGoal>>(`/goals/${goalId}/regenerate`);
+  return data.data;
+}
+
+export async function toggleGoalMilestone(goalId: string, milestoneId: string): Promise<LongTermGoal> {
+  const { data } = await api.patch<ApiResponse<LongTermGoal>>(`/goals/${goalId}/milestones/${milestoneId}/toggle`);
+  return data.data;
+}
+
+export async function addGoalMilestone(
+  goalId: string,
+  req: { title: string; description?: string; targetDate?: string }
+): Promise<LongTermGoal> {
+  const { data } = await api.post<ApiResponse<LongTermGoal>>(`/goals/${goalId}/milestones`, req);
+  return data.data;
+}
+
+export async function updateGoalStatus(goalId: string, status: string): Promise<LongTermGoal> {
+  const { data } = await api.patch<ApiResponse<LongTermGoal>>(`/goals/${goalId}/status`, { status });
+  return data.data;
+}
+
+export async function deleteGoal(goalId: string): Promise<void> {
+  await api.delete(`/goals/${goalId}`);
+}
+
+export async function adoptGoalHabits(
+  goalId: string,
+  req: {
+    suggestedHabitIds: string[];
+    mode: 'ADD_TO_ACTIVE_PERIOD' | 'START_NEW_PERIOD';
+    periodName?: string;
+    presetDays?: number;
+    replaceActivePeriod?: boolean;
+  }
+): Promise<{ addedHabitsCount: number; periodId: string; periodName: string; goal: LongTermGoal }> {
+  const { data } = await api.post<
+    ApiResponse<{ addedHabitsCount: number; periodId: string; periodName: string; goal: LongTermGoal }>
+  >(`/goals/${goalId}/adopt-habits`, req);
+  return data.data;
 }

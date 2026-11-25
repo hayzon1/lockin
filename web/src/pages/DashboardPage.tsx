@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as api from '../services/api';
+import { useTheme } from '../context/ThemeContext';
 import confetti from 'canvas-confetti';
 import {
   CheckCircle2,
@@ -12,6 +13,9 @@ import {
   CalendarDays,
   Target,
   ArrowRight,
+  Zap,
+  Link2,
+  Compass,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -28,7 +32,9 @@ interface DashboardPageProps {
 
 export default function DashboardPage({ onNavigateToPeriods }: DashboardPageProps) {
   const queryClient = useQueryClient();
+  const { resolvedTheme } = useTheme();
   const [chartMode, setChartMode] = useState<'count' | 'percentage'>('percentage');
+  const [twoMinMode, setTwoMinMode] = useState(false);
   const [newHabitName, setNewHabitName] = useState('');
   const [isAddingHabit, setIsAddingHabit] = useState(false);
 
@@ -67,6 +73,7 @@ export default function DashboardPage({ onNavigateToPeriods }: DashboardPageProp
       queryClient.setQueryData(['dailyChecklist'], updatedChecklist);
       queryClient.invalidateQueries({ queryKey: ['growthTrajectory'] });
       queryClient.invalidateQueries({ queryKey: ['periodOverview'] });
+      queryClient.invalidateQueries({ queryKey: ['goals'] });
 
       // Trigger celebratory confetti if 100% completed
       if (
@@ -91,6 +98,7 @@ export default function DashboardPage({ onNavigateToPeriods }: DashboardPageProp
       queryClient.setQueryData(['dailyChecklist'], updatedChecklist);
       queryClient.invalidateQueries({ queryKey: ['growthTrajectory'] });
       queryClient.invalidateQueries({ queryKey: ['periodOverview'] });
+      queryClient.invalidateQueries({ queryKey: ['goals'] });
     },
   });
 
@@ -133,19 +141,19 @@ export default function DashboardPage({ onNavigateToPeriods }: DashboardPageProp
   if (!activePeriod) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-4 text-center max-w-lg mx-auto">
-        <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-400 mb-6">
+        <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-600 dark:text-emerald-400 mb-6">
           <Target className="w-10 h-10" />
         </div>
-        <h2 className="text-2xl font-bold tracking-tight text-white mb-2">
+        <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white mb-2">
           No Active Tracking Period
         </h2>
-        <p className="text-sm text-zinc-400 mb-8 leading-relaxed">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-8 leading-relaxed">
           LOCKIN organizes habits into time-boxed tracking periods (e.g. 14, 21, 30, or 90 days).
           Create your first period to start measuring your daily consistency.
         </p>
         <button
           onClick={onNavigateToPeriods}
-          className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-zinc-950 font-semibold px-5 py-3 rounded-xl shadow-lg shadow-emerald-500/20 text-sm transition-all cursor-pointer"
+          className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 dark:bg-emerald-500 dark:hover:bg-emerald-400 text-white dark:text-zinc-950 font-semibold px-5 py-3 rounded-xl shadow-lg shadow-emerald-500/20 text-sm transition-all cursor-pointer"
         >
           <span>Create Tracking Period</span>
           <ArrowRight className="w-4 h-4" />
@@ -163,38 +171,40 @@ export default function DashboardPage({ onNavigateToPeriods }: DashboardPageProp
     isFuture: p.future,
   })) || [];
 
+  const axisStroke = resolvedTheme === 'dark' ? '#52525b' : '#71717a';
+
   return (
     <div className="space-y-6">
       {/* Top Banner / Period Overview */}
-      <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5 sm:p-6 backdrop-blur-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 sm:p-6 shadow-sm dark:shadow-none backdrop-blur-md flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5 mb-1">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
               Active Period
             </span>
-            <span className="text-xs text-zinc-400">
+            <span className="text-xs text-zinc-500 dark:text-zinc-400">
               Day {activePeriod.daysElapsed} of {activePeriod.totalDays}
             </span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+          <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white tracking-tight">
             {activePeriod.name}
           </h2>
           {activePeriod.description && (
-            <p className="text-xs sm:text-sm text-zinc-400 mt-1 max-w-xl">
+            <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1 max-w-xl">
               {activePeriod.description}
             </p>
           )}
         </div>
 
         {/* Progress Bar & Counter */}
-        <div className="w-full md:w-64 shrink-0 bg-zinc-950/60 border border-zinc-800/80 rounded-xl p-3.5">
-          <div className="flex justify-between text-xs text-zinc-400 mb-1.5 font-medium">
+        <div className="w-full md:w-64 shrink-0 bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200/80 dark:border-zinc-800/80 rounded-xl p-3.5">
+          <div className="flex justify-between text-xs text-zinc-600 dark:text-zinc-400 mb-1.5 font-medium">
             <span>Period Elapsed</span>
             <span>
               {Math.round((activePeriod.daysElapsed / activePeriod.totalDays) * 100)}%
             </span>
           </div>
-          <div className="w-full bg-zinc-800 rounded-full h-2 overflow-hidden">
+          <div className="w-full bg-zinc-200 dark:bg-zinc-800 rounded-full h-2 overflow-hidden">
             <div
               className="bg-emerald-500 h-2 rounded-full transition-all duration-500"
               style={{
@@ -212,32 +222,50 @@ export default function DashboardPage({ onNavigateToPeriods }: DashboardPageProp
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left 2 Cols: Daily Checklist */}
         <div className="lg:col-span-2 space-y-4">
-          <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5 sm:p-6 backdrop-blur-md">
-            <div className="flex items-center justify-between pb-4 border-b border-zinc-800/80 mb-4">
+          <div className="bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 sm:p-6 shadow-sm dark:shadow-none backdrop-blur-md">
+            <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-zinc-200 dark:border-zinc-800/80 mb-4">
               <div>
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <h3 className="text-base font-bold text-zinc-900 dark:text-white flex flex-wrap items-center gap-x-2 gap-y-0.5">
                   <span>Today's Checklist</span>
-                  <span className="text-xs text-zinc-400 font-normal">
+                  <span className="text-xs text-zinc-500 dark:text-zinc-400 font-normal">
                     ({checklist?.dayOfWeek}, {checklist?.date})
                   </span>
                 </h3>
-                <p className="text-xs text-zinc-400 mt-0.5">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
                   Check off daily habits to maintain consistency.
                 </p>
               </div>
 
-              {checklist && (
-                <div className="text-right">
-                  <div className="text-sm font-bold text-emerald-400">
-                    {checklist.completedCount} of {checklist.eligibleCount} done
+              <div className="flex items-center gap-3">
+                {checklist?.habits.some((h) => h.twoMinuteVersion) && (
+                  <button
+                    type="button"
+                    onClick={() => setTwoMinMode(!twoMinMode)}
+                    title="Low-energy day? Switch to 2-Minute Fallback mode to show up and protect your streak."
+                    className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border transition-colors cursor-pointer ${
+                      twoMinMode
+                        ? 'bg-amber-500/15 border-amber-500/40 text-amber-700 dark:text-amber-300'
+                        : 'bg-zinc-100 dark:bg-zinc-800/80 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:border-amber-500/40'
+                    }`}
+                  >
+                    <Zap className="w-3.5 h-3.5 text-amber-500" />
+                    <span>{twoMinMode ? '2-Min Mode ON' : 'Low Energy?'}</span>
+                  </button>
+                )}
+
+                {checklist && (
+                  <div className="text-right">
+                    <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                      {checklist.completedCount} of {checklist.eligibleCount} done
+                    </div>
+                    <div className="text-[11px] text-zinc-500">
+                      {checklist.completionPercentage !== null
+                        ? `${checklist.completionPercentage}% achieved`
+                        : 'No habits active'}
+                    </div>
                   </div>
-                  <div className="text-[11px] text-zinc-500">
-                    {checklist.completionPercentage !== null
-                      ? `${checklist.completionPercentage}% achieved`
-                      : 'No habits active'}
-                  </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             {checklistLoading ? (
@@ -257,41 +285,70 @@ export default function DashboardPage({ onNavigateToPeriods }: DashboardPageProp
                     onClick={() => handleToggleHabit(item.habitId, item.completed)}
                     className={`w-full flex items-center justify-between p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
                       item.completed
-                        ? 'bg-emerald-950/20 border-emerald-500/30 text-zinc-200'
-                        : 'bg-zinc-950/40 border-zinc-800/80 hover:border-zinc-700 text-zinc-300'
+                        ? 'bg-emerald-50/80 dark:bg-emerald-950/20 border-emerald-300 dark:border-emerald-500/30 text-zinc-700 dark:text-zinc-200'
+                        : 'bg-zinc-50 dark:bg-zinc-950/40 border-zinc-200 dark:border-zinc-800/80 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-800 dark:text-zinc-300'
                     }`}
                   >
                     <div className="flex items-center gap-3.5 min-w-0">
                       {item.completed ? (
-                        <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                        <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                       ) : (
-                        <Circle className="w-5 h-5 text-zinc-600 hover:text-zinc-400 shrink-0" />
+                        <Circle className="w-5 h-5 text-zinc-400 dark:text-zinc-600 hover:text-zinc-600 dark:hover:text-zinc-400 shrink-0" />
                       )}
-                      <div className="truncate">
-                        <span
-                          className={`text-sm font-medium ${
-                            item.completed
-                              ? 'line-through text-zinc-400'
-                              : 'text-zinc-100'
-                          }`}
-                        >
-                          {item.name}
-                        </span>
-                        {item.category && (
-                          <span className="ml-2.5 inline-block text-[10px] px-2 py-0.5 rounded-full bg-zinc-800/80 text-zinc-400 border border-zinc-700/40">
-                            {item.category}
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span
+                            className={`text-sm font-medium ${
+                              item.completed
+                                ? 'line-through text-zinc-400'
+                                : 'text-zinc-900 dark:text-zinc-100'
+                            }`}
+                          >
+                            {twoMinMode && item.twoMinuteVersion ? item.twoMinuteVersion : item.name}
                           </span>
-                        )}
-                        {item.description && (
-                          <p className="text-xs text-zinc-500 truncate mt-0.5">
-                            {item.description}
+                          {item.category && (
+                            <span className="inline-block text-[10px] px-2 py-0.5 rounded-full bg-zinc-200/70 dark:bg-zinc-800/80 text-zinc-600 dark:text-zinc-400 border border-zinc-300/60 dark:border-zinc-700/40">
+                              {item.category}
+                            </span>
+                          )}
+                          {item.goalTitle && (
+                            <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+                              <Compass className="w-2.5 h-2.5" />
+                              <span className="truncate max-w-[140px]">{item.goalTitle}</span>
+                            </span>
+                          )}
+                        </div>
+                        {twoMinMode && item.twoMinuteVersion ? (
+                          <p className="text-[11px] text-amber-700 dark:text-amber-300 mt-1 flex items-center gap-1">
+                            <Zap className="w-3 h-3 shrink-0" />
+                            <span>2-min fallback for: {item.name}</span>
                           </p>
+                        ) : (
+                          <>
+                            {item.twoMinuteVersion && (
+                              <p className="text-[11px] text-amber-700/90 dark:text-amber-400/90 mt-1 flex items-start gap-1">
+                                <Zap className="w-3 h-3 shrink-0 mt-0.5" />
+                                <span>2-min fallback: {item.twoMinuteVersion}</span>
+                              </p>
+                            )}
+                            {item.habitStackCue && (
+                              <p className="text-[11px] text-sky-700/90 dark:text-sky-400/90 mt-0.5 flex items-start gap-1">
+                                <Link2 className="w-3 h-3 shrink-0 mt-0.5" />
+                                <span>{item.habitStackCue}</span>
+                              </p>
+                            )}
+                            {!item.twoMinuteVersion && item.description && (
+                              <p className="text-xs text-zinc-500 truncate mt-0.5">
+                                {item.description}
+                              </p>
+                            )}
+                          </>
                         )}
                       </div>
                     </div>
 
                     {item.completed && (
-                      <span className="text-[10px] text-emerald-500 font-semibold uppercase tracking-wider shrink-0 pl-2">
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-500 font-semibold uppercase tracking-wider shrink-0 pl-2">
                         Done
                       </span>
                     )}
@@ -301,9 +358,9 @@ export default function DashboardPage({ onNavigateToPeriods }: DashboardPageProp
             )}
 
             {/* Quick Add Habit form */}
-            <div className="mt-5 pt-4 border-t border-zinc-800/80">
+            <div className="mt-5 pt-4 border-t border-zinc-200 dark:border-zinc-800/80">
               {isAddingHabit ? (
-                <form onSubmit={handleCreateHabitSubmit} className="flex gap-2">
+                <form onSubmit={handleCreateHabitSubmit} className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="text"
                     required
@@ -311,28 +368,30 @@ export default function DashboardPage({ onNavigateToPeriods }: DashboardPageProp
                     placeholder="e.g. Read 20 pages, 30 min workout..."
                     value={newHabitName}
                     onChange={(e) => setNewHabitName(e.target.value)}
-                    className="flex-1 bg-zinc-950/80 border border-zinc-800 rounded-xl px-3.5 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    className="flex-1 bg-zinc-50 dark:bg-zinc-950/80 border border-zinc-300 dark:border-zinc-800 rounded-xl px-3.5 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   />
-                  <button
-                    type="submit"
-                    disabled={addHabitMutation.isPending}
-                    className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-zinc-950 text-xs font-semibold rounded-xl cursor-pointer"
-                  >
-                    Save
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setIsAddingHabit(false); setNewHabitName(''); }}
-                    className="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium rounded-xl cursor-pointer"
-                  >
-                    Cancel
-                  </button>
+                  <div className="flex gap-2 shrink-0">
+                    <button
+                      type="submit"
+                      disabled={addHabitMutation.isPending}
+                      className="flex-1 sm:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-500 dark:bg-emerald-500 dark:hover:bg-emerald-400 text-white dark:text-zinc-950 text-xs font-semibold rounded-xl cursor-pointer"
+                    >
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setIsAddingHabit(false); setNewHabitName(''); }}
+                      className="flex-1 sm:flex-none px-3 py-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-xs font-medium rounded-xl cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </form>
               ) : (
                 <button
                   type="button"
                   onClick={() => setIsAddingHabit(true)}
-                  className="flex items-center gap-2 text-xs font-medium text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer py-1"
+                  className="flex items-center gap-2 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300 transition-colors cursor-pointer py-1"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add New Daily Habit</span>
@@ -344,18 +403,18 @@ export default function DashboardPage({ onNavigateToPeriods }: DashboardPageProp
 
         {/* Right 1 Col: Quick Stats */}
         <div className="space-y-4">
-          <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5 sm:p-6 backdrop-blur-md space-y-4">
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider text-zinc-400">
+          <div className="bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 sm:p-6 shadow-sm dark:shadow-none backdrop-blur-md space-y-4">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
               Period Performance
             </h3>
 
             <div className="grid grid-cols-2 gap-3">
-              <div className="bg-zinc-950/60 border border-zinc-800/80 rounded-xl p-3.5">
-                <div className="flex items-center gap-2 text-zinc-400 text-xs mb-1">
-                  <Flame className="w-4 h-4 text-amber-400" />
+              <div className="bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200/80 dark:border-zinc-800/80 rounded-xl p-3.5">
+                <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 text-xs mb-1">
+                  <Flame className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                   <span>Streak</span>
                 </div>
-                <div className="text-2xl font-bold text-white">
+                <div className="text-2xl font-bold text-zinc-900 dark:text-white">
                   {overview?.currentStreak ?? 0}
                   <span className="text-xs text-zinc-500 ml-1 font-normal">days</span>
                 </div>
@@ -364,12 +423,12 @@ export default function DashboardPage({ onNavigateToPeriods }: DashboardPageProp
                 </p>
               </div>
 
-              <div className="bg-zinc-950/60 border border-zinc-800/80 rounded-xl p-3.5">
-                <div className="flex items-center gap-2 text-zinc-400 text-xs mb-1">
-                  <TrendingUp className="w-4 h-4 text-emerald-400" />
+              <div className="bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200/80 dark:border-zinc-800/80 rounded-xl p-3.5">
+                <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 text-xs mb-1">
+                  <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   <span>Overall</span>
                 </div>
-                <div className="text-2xl font-bold text-white">
+                <div className="text-2xl font-bold text-zinc-900 dark:text-white">
                   {overview?.overallCompletionPercentage !== null
                     ? `${overview?.overallCompletionPercentage}%`
                     : '—'}
@@ -380,24 +439,24 @@ export default function DashboardPage({ onNavigateToPeriods }: DashboardPageProp
               </div>
             </div>
 
-            <div className="bg-zinc-950/60 border border-zinc-800/80 rounded-xl p-3.5 space-y-2">
+            <div className="bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200/80 dark:border-zinc-800/80 rounded-xl p-3.5 space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-zinc-400 flex items-center gap-1.5">
-                  <CalendarDays className="w-3.5 h-3.5 text-zinc-500" />
+                <span className="text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5">
+                  <CalendarDays className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500" />
                   Total Check-ins
                 </span>
-                <span className="font-semibold text-zinc-200">
+                <span className="font-semibold text-zinc-800 dark:text-zinc-200">
                   {overview?.actualCompletedEntries ?? 0} / {overview?.totalPossibleCompletions ?? 0}
                 </span>
               </div>
 
               {overview?.mostConsistentHabit && (
-                <div className="flex items-center justify-between text-xs pt-2 border-t border-zinc-800/80">
-                  <span className="text-zinc-400 flex items-center gap-1.5 truncate">
-                    <Award className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <div className="flex items-center justify-between text-xs pt-2 border-t border-zinc-200 dark:border-zinc-800/80">
+                  <span className="text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5 truncate">
+                    <Award className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                     Top Habit
                   </span>
-                  <span className="font-medium text-emerald-400 truncate max-w-[120px] text-right">
+                  <span className="font-medium text-emerald-600 dark:text-emerald-400 truncate max-w-[120px] text-right">
                     {overview.mostConsistentHabit}
                   </span>
                 </div>
@@ -408,23 +467,23 @@ export default function DashboardPage({ onNavigateToPeriods }: DashboardPageProp
       </div>
 
       {/* Growth Trajectory Chart */}
-      <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5 sm:p-6 backdrop-blur-md">
+      <div className="bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 sm:p-6 shadow-sm dark:shadow-none backdrop-blur-md">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
           <div>
-            <h3 className="text-base font-bold text-white">Growth Trajectory</h3>
-            <p className="text-xs text-zinc-400 mt-0.5">
+            <h3 className="text-base font-bold text-zinc-900 dark:text-white">Growth Trajectory</h3>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
               Daily habit completion across the tracking period.
             </p>
           </div>
 
-          <div className="inline-flex rounded-xl bg-zinc-950 p-1 border border-zinc-800 shrink-0">
+          <div className="inline-flex self-start sm:self-auto rounded-xl bg-zinc-100 dark:bg-zinc-950 p-1 border border-zinc-200 dark:border-zinc-800 shrink-0">
             <button
               type="button"
               onClick={() => setChartMode('percentage')}
               className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
                 chartMode === 'percentage'
-                  ? 'bg-zinc-800 text-white shadow'
-                  : 'text-zinc-400 hover:text-zinc-200'
+                  ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm'
+                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
               }`}
             >
               Percentage (%)
@@ -434,8 +493,8 @@ export default function DashboardPage({ onNavigateToPeriods }: DashboardPageProp
               onClick={() => setChartMode('count')}
               className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
                 chartMode === 'count'
-                  ? 'bg-zinc-800 text-white shadow'
-                  : 'text-zinc-400 hover:text-zinc-200'
+                  ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm'
+                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
               }`}
             >
               Count (Habits)
@@ -459,12 +518,12 @@ export default function DashboardPage({ onNavigateToPeriods }: DashboardPageProp
                 </defs>
                 <XAxis
                   dataKey="date"
-                  stroke="#52525b"
+                  stroke={axisStroke}
                   fontSize={11}
                   tickLine={false}
                 />
                 <YAxis
-                  stroke="#52525b"
+                  stroke={axisStroke}
                   fontSize={11}
                   tickLine={false}
                   domain={chartMode === 'percentage' ? [0, 100] : [0, 'auto']}
@@ -476,16 +535,16 @@ export default function DashboardPage({ onNavigateToPeriods }: DashboardPageProp
                       const data = payload[0].payload;
                       if (data.isFuture) {
                         return (
-                          <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-2 text-xs shadow-xl">
-                            <p className="text-zinc-400 font-medium">{data.date} (Upcoming)</p>
+                          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-2 text-xs shadow-xl">
+                            <p className="text-zinc-600 dark:text-zinc-400 font-medium">{data.date} (Upcoming)</p>
                             <p className="text-zinc-500 mt-1">{data.maxEligible} habits scheduled</p>
                           </div>
                         );
                       }
                       return (
-                        <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-2 text-xs shadow-xl">
-                          <p className="text-zinc-400 font-medium">{data.date}</p>
-                          <p className="text-emerald-400 font-bold mt-1">
+                        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-2 text-xs shadow-xl">
+                          <p className="text-zinc-600 dark:text-zinc-400 font-medium">{data.date}</p>
+                          <p className="text-emerald-600 dark:text-emerald-400 font-bold mt-1">
                             {chartMode === 'percentage'
                               ? `${data.percentage ?? 0}% achieved`
                               : `${data.value} of ${data.maxEligible} habits`}

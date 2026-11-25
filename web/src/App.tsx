@@ -1,13 +1,17 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import AppLayout from './layouts/AppLayout';
 import AuthPage from './pages/AuthPage';
+import LandingPage from './pages/LandingPage';
 import DashboardPage from './pages/DashboardPage';
+import GoalsPage from './pages/GoalsPage';
 import PeriodsPage from './pages/PeriodsPage';
 import CalendarPage from './pages/CalendarPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import SettingsPage from './pages/SettingsPage';
+import AdminPage from './pages/AdminPage';
 import { Target } from 'lucide-react';
 
 const queryClient = new QueryClient({
@@ -20,16 +24,26 @@ const queryClient = new QueryClient({
   },
 });
 
-type NavTab = 'dashboard' | 'periods' | 'calendar' | 'analytics' | 'settings';
+type AuthMode = 'login' | 'register';
+
+type NavTab = 'dashboard' | 'goals' | 'periods' | 'calendar' | 'analytics' | 'settings' | 'admin';
 
 function MainApp() {
   const { user, loading } = useAuth();
   const [currentTab, setCurrentTab] = useState<NavTab>('dashboard');
+  // Email verification links (?token=...) go straight to AuthPage, which handles them.
+  const [authMode, setAuthMode] = useState<AuthMode | null>(() =>
+    new URLSearchParams(window.location.search).has('token') ? 'login' : null
+  );
+
+  useEffect(() => {
+    if (user) setAuthMode(null);
+  }, [user]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center">
-        <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-400 mb-4 animate-pulse">
+      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex flex-col items-center justify-center transition-colors">
+        <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-600 dark:text-emerald-400 mb-4 animate-pulse">
           <Target className="w-8 h-8" />
         </div>
         <p className="text-xs text-zinc-500 font-mono tracking-wider uppercase">Loading LOCKIN...</p>
@@ -38,7 +52,10 @@ function MainApp() {
   }
 
   if (!user) {
-    return <AuthPage />;
+    if (authMode) {
+      return <AuthPage initialMode={authMode} onBack={() => setAuthMode(null)} />;
+    }
+    return <LandingPage onLogin={() => setAuthMode('login')} onGetStarted={() => setAuthMode('register')} />;
   }
 
   return (
@@ -46,10 +63,14 @@ function MainApp() {
       {currentTab === 'dashboard' && (
         <DashboardPage onNavigateToPeriods={() => setCurrentTab('periods')} />
       )}
+      {currentTab === 'goals' && (
+        <GoalsPage onNavigateToDashboard={() => setCurrentTab('dashboard')} />
+      )}
       {currentTab === 'periods' && <PeriodsPage />}
       {currentTab === 'calendar' && <CalendarPage />}
       {currentTab === 'analytics' && <AnalyticsPage />}
       {currentTab === 'settings' && <SettingsPage />}
+      {currentTab === 'admin' && <AdminPage />}
     </AppLayout>
   );
 }
@@ -58,7 +79,9 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <MainApp />
+        <ThemeProvider>
+          <MainApp />
+        </ThemeProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

@@ -21,10 +21,13 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<UserDto>> register(@Valid @RequestBody RegisterRequest request) {
-        UserDto user = authService.register(request);
+    public ResponseEntity<ApiResponse<UserDto>> register(
+            @Valid @RequestBody RegisterRequest request,
+            HttpServletResponse response
+    ) {
+        UserDto user = authService.register(request, response);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(user, "Registration successful. Please check your email to verify your account."));
+                .body(ApiResponse.success(user, "Registration successful"));
     }
 
     @PostMapping("/verify-email")

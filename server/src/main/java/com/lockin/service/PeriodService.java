@@ -149,7 +149,11 @@ public class PeriodService {
                         h.getCategory(),
                         h.getDisplayOrder(),
                         h.getEffectiveStartDate(),
-                        h.isArchived()
+                        h.isArchived(),
+                        h.getGoal() != null ? h.getGoal().getId() : null,
+                        h.getGoal() != null ? h.getGoal().getTitle() : null,
+                        h.getTwoMinuteVersion(),
+                        h.getHabitStackCue()
                 ))
                 .toList()
                 : List.of();

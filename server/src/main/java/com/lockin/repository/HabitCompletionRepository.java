@@ -30,5 +30,7 @@ public interface HabitCompletionRepository extends JpaRepository<HabitCompletion
 
     long countByHabitId(UUID habitId);
 
+    long countByHabitIdIn(Collection<UUID> habitIds);
+
     long countByHabitIdAndCompletionDateBetween(UUID habitId, LocalDate startDate, LocalDate endDate);
 }

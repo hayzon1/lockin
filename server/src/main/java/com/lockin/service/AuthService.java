@@ -42,6 +42,8 @@ public class AuthService {
     private final CookieService cookieService;
     private final EmailService emailService;
     private final long sessionMaxAgeSeconds;
+    private final boolean autoVerify;
+    private final java.util.Set<String> adminEmails;
 
     public AuthService(
             UserRepository userRepository,
@@ -52,7 +54,9 @@ public class AuthService {
             JwtService jwtService,
             CookieService cookieService,
             EmailService emailService,
-            @Value("${app.jwt.expiration-ms:86400000}") long expirationMs
+            @Value("${app.jwt.expiration-ms:86400000}") long expirationMs,
+            @Value("${app.auth.auto-verify:true}") boolean autoVerify,
+            @Value("${app.auth.admin-emails:azon1129@gmail.com,admin@lockin.app}") String adminEmailsConfig
     ) {
         this.userRepository = userRepository;
         this.preferencesRepository = preferencesRepository;
@@ -63,10 +67,20 @@ public class AuthService {
         this.cookieService = cookieService;
         this.emailService = emailService;
         this.sessionMaxAgeSeconds = expirationMs / 1000;
+        this.autoVerify = autoVerify;
+        this.adminEmails = java.util.Arrays.stream(adminEmailsConfig.split(","))
+                .map(String::trim)
+                .map(String::toLowerCase)
+                .collect(java.util.stream.Collectors.toSet());
     }
 
     @Transactional
     public UserDto register(RegisterRequest request) {
+        return register(request, null);
+    }
+
+    @Transactional
+    public UserDto register(RegisterRequest request, HttpServletResponse response) {
         if (!request.getPassword().equals(request.getConfirmPassword())) {
             throw new AppException("Passwords do not match");
         }
@@ -78,12 +92,32 @@ public class AuthService {
 
         String encodedPassword = passwordEncoder.encode(request.getPassword());
         UserEntity user = new UserEntity(normalizedEmail, encodedPassword);
+
+        // Demographic attributes
+        if (request.getFullName() != null && !request.getFullName().trim().isEmpty()) {
+            user.setFullName(request.getFullName().trim());
+        }
+        if (request.getAge() != null) {
+            user.setAge(request.getAge());
+        }
+        if (request.getGender() != null && !request.getGender().trim().isEmpty()) {
+            user.setGender(request.getGender().trim());
+        }
+
+        // Check if admin email
+        if (adminEmails.contains(normalizedEmail)) {
+            user.setRole("ADMIN");
+            user.setEmailVerified(true);
+        } else if (autoVerify) {
+            user.setEmailVerified(true);
+        }
+
         user = userRepository.save(user);
 
         UserPreferencesEntity preferences = new UserPreferencesEntity(user, "UTC", "dark");
         preferencesRepository.save(preferences);
 
-        // Generate email verification token
+        // Generate email verification token (for audit / reset workflows)
         String rawToken = UUID.randomUUID().toString();
         String tokenHash = hashToken(rawToken);
         Instant expiresAt = Instant.now().plus(24, ChronoUnit.HOURS);
@@ -92,6 +126,13 @@ public class AuthService {
         verificationTokenRepository.save(tokenEntity);
 
         emailService.sendVerificationEmail(user.getEmail(), rawToken);
+
+        // If auto-verify is active and response is provided, automatically issue session cookie
+        if (user.isEmailVerified() && response != null) {
+            String token = jwtService.generateToken(user.getId(), user.getEmail(), user.isEmailVerified());
+            ResponseCookie sessionCookie = cookieService.createSessionCookie(token, sessionMaxAgeSeconds);
+            response.addHeader(HttpHeaders.SET_COOKIE, sessionCookie.toString());
+        }
 
         return toUserDto(user, preferences);
     }
@@ -150,7 +191,17 @@ public class AuthService {
         }
 
         if (!user.isEmailVerified()) {
-            throw new AppException("Account unverified. Please verify your email before logging in.", HttpStatus.FORBIDDEN);
+            if (autoVerify || adminEmails.contains(normalizedEmail)) {
+                user.setEmailVerified(true);
+                userRepository.save(user);
+            } else {
+                throw new AppException("Account unverified. Please verify your email before logging in.", HttpStatus.FORBIDDEN);
+            }
+        }
+
+        if (adminEmails.contains(normalizedEmail) && !"ADMIN".equalsIgnoreCase(user.getRole())) {
+            user.setRole("ADMIN");
+            userRepository.save(user);
         }
 
         String token = jwtService.generateToken(user.getId(), user.getEmail(), user.isEmailVerified());
@@ -226,7 +277,17 @@ public class AuthService {
     private UserDto toUserDto(UserEntity user, UserPreferencesEntity preferences) {
         String timezone = preferences != null ? preferences.getTimezone() : "UTC";
         String theme = preferences != null ? preferences.getTheme() : "dark";
-        return new UserDto(user.getId(), user.getEmail(), user.isEmailVerified(), timezone, theme);
+        return new UserDto(
+                user.getId(),
+                user.getEmail(),
+                user.isEmailVerified(),
+                timezone,
+                theme,
+                user.getFullName(),
+                user.getAge(),
+                user.getGender(),
+                user.getRole()
+        );
     }
 
     private String hashToken(String rawToken) {

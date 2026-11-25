@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@SpringBootTest(properties = "app.auth.auto-verify=false")
 @Transactional
 class AuthServiceTest {
 
