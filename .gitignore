@@ -37,3 +37,8 @@ yarn-error.log*
 # Temporary files
 *.tmp
 *.bak
+
+# Local AI Skills & Tooling
+.claude/
+skills-lock.json
+skills-lock.json.lock

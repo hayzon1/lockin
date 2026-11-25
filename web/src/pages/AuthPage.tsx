@@ -2,12 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import * as api from '../services/api';
-import { Target, ArrowRight, ShieldCheck, Mail, Lock, CheckCircle2, KeyRound, Sun, Moon } from 'lucide-react';
+import { Target, ArrowRight, ShieldCheck, Mail, Lock, CheckCircle2, KeyRound, Sun, Moon, ArrowLeft } from 'lucide-react';
 
-export default function AuthPage() {
+interface AuthPageProps {
+  initialMode?: 'login' | 'register';
+  onBack?: () => void;
+}
+
+export default function AuthPage({ initialMode = 'login', onBack }: AuthPageProps) {
   const { login, register } = useAuth();
   const { resolvedTheme, setTheme } = useTheme();
-  const [isRegister, setIsRegister] = useState(false);
+  const [isRegister, setIsRegister] = useState(initialMode === 'register');
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [isVerifyToken, setIsVerifyToken] = useState(false);
   const [email, setEmail] = useState('');
@@ -114,6 +119,16 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-zinc-900 dark:text-zinc-100 relative transition-colors duration-200">
+      {onBack && (
+        <button
+          type="button"
+          onClick={onBack}
+          className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back</span>
+        </button>
+      )}
       <button
         type="button"
         onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}

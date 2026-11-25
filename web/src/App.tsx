@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import AppLayout from './layouts/AppLayout';
 import AuthPage from './pages/AuthPage';
+import LandingPage from './pages/LandingPage';
 import DashboardPage from './pages/DashboardPage';
 import GoalsPage from './pages/GoalsPage';
 import PeriodsPage from './pages/PeriodsPage';
@@ -23,11 +24,21 @@ const queryClient = new QueryClient({
   },
 });
 
+type AuthMode = 'login' | 'register';
+
 type NavTab = 'dashboard' | 'goals' | 'periods' | 'calendar' | 'analytics' | 'settings' | 'admin';
 
 function MainApp() {
   const { user, loading } = useAuth();
   const [currentTab, setCurrentTab] = useState<NavTab>('dashboard');
+  // Email verification links (?token=...) go straight to AuthPage, which handles them.
+  const [authMode, setAuthMode] = useState<AuthMode | null>(() =>
+    new URLSearchParams(window.location.search).has('token') ? 'login' : null
+  );
+
+  useEffect(() => {
+    if (user) setAuthMode(null);
+  }, [user]);
 
   if (loading) {
     return (
@@ -41,7 +52,10 @@ function MainApp() {
   }
 
   if (!user) {
-    return <AuthPage />;
+    if (authMode) {
+      return <AuthPage initialMode={authMode} onBack={() => setAuthMode(null)} />;
+    }
+    return <LandingPage onLogin={() => setAuthMode('login')} onGetStarted={() => setAuthMode('register')} />;
   }
 
   return (
