@@ -6,6 +6,7 @@ import AppLayout from './layouts/AppLayout';
 import AuthPage from './pages/AuthPage';
 import LandingPage from './pages/LandingPage';
 import DashboardPage from './pages/DashboardPage';
+import TasksPage from './pages/TasksPage';
 import GoalsPage from './pages/GoalsPage';
 import PeriodsPage from './pages/PeriodsPage';
 import CalendarPage from './pages/CalendarPage';
@@ -26,7 +27,7 @@ const queryClient = new QueryClient({
 
 type AuthMode = 'login' | 'register';
 
-type NavTab = 'dashboard' | 'goals' | 'periods' | 'calendar' | 'analytics' | 'settings' | 'admin';
+type NavTab = 'dashboard' | 'tasks' | 'goals' | 'periods' | 'calendar' | 'analytics' | 'settings' | 'admin';
 
 function MainApp() {
   const { user, loading } = useAuth();
@@ -61,8 +62,12 @@ function MainApp() {
   return (
     <AppLayout currentTab={currentTab} setCurrentTab={setCurrentTab}>
       {currentTab === 'dashboard' && (
-        <DashboardPage onNavigateToPeriods={() => setCurrentTab('periods')} />
+        <DashboardPage
+          onNavigateToPeriods={() => setCurrentTab('periods')}
+          onNavigateToTasks={() => setCurrentTab('tasks')}
+        />
       )}
+      {currentTab === 'tasks' && <TasksPage />}
       {currentTab === 'goals' && (
         <GoalsPage onNavigateToDashboard={() => setCurrentTab('dashboard')} />
       )}

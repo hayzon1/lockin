@@ -16,6 +16,7 @@ import {
   Zap,
   Link2,
   Compass,
+  CheckSquare,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -28,9 +29,10 @@ import {
 
 interface DashboardPageProps {
   onNavigateToPeriods: () => void;
+  onNavigateToTasks?: () => void;
 }
 
-export default function DashboardPage({ onNavigateToPeriods }: DashboardPageProps) {
+export default function DashboardPage({ onNavigateToPeriods, onNavigateToTasks }: DashboardPageProps) {
   const queryClient = useQueryClient();
   const { resolvedTheme } = useTheme();
   const [chartMode, setChartMode] = useState<'count' | 'percentage'>('percentage');
@@ -64,6 +66,32 @@ export default function DashboardPage({ onNavigateToPeriods }: DashboardPageProp
     queryFn: () => api.getPeriodOverview(activePeriod!.id),
     enabled: !!activePeriod?.id,
   });
+
+  // Today & Tomorrow Planned Tasks
+  const todayIso = (() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  })();
+  const tomorrowIso = (() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  })();
+
+  const { data: allTodos = [] } = useQuery({
+    queryKey: ['todos'],
+    queryFn: () => api.getTodos({ view: 'all' }),
+  });
+
+  const toggleTodoMutation = useMutation({
+    mutationFn: api.toggleTodo,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['todos'] });
+    },
+  });
+
+  const todayTodos = allTodos.filter((t) => t.dueDate === todayIso);
+  const tomorrowTodosCount = allTodos.filter((t) => t.dueDate === tomorrowIso && !t.completed).length;
 
   // Check habit mutation with optimistic update
   const checkMutation = useMutation({
@@ -461,6 +489,79 @@ export default function DashboardPage({ onNavigateToPeriods }: DashboardPageProp
                   </span>
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Today's Tasks & Tomorrow Quick Card */}
+          <div className="bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 sm:p-6 shadow-sm dark:shadow-none backdrop-blur-md space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5">
+                <CheckSquare className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <span>Today's Tasks</span>
+              </h3>
+              {onNavigateToTasks && (
+                <button
+                  type="button"
+                  onClick={onNavigateToTasks}
+                  className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  <span>Plan Tomorrow</span>
+                  <ArrowRight className="w-3 h-3" />
+                </button>
+              )}
+            </div>
+
+            {todayTodos.length === 0 ? (
+              <p className="text-xs text-zinc-500 py-2">
+                No one-off tasks scheduled for today.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {todayTodos.slice(0, 4).map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => toggleTodoMutation.mutate(t.id)}
+                    className="w-full flex items-center gap-2.5 p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200/80 dark:border-zinc-800/80 text-left text-xs hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors cursor-pointer"
+                  >
+                    {t.completed ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    ) : (
+                      <Circle className="w-4 h-4 text-zinc-400 dark:text-zinc-600 shrink-0" />
+                    )}
+                    <span
+                      className={`truncate flex-1 ${
+                        t.completed
+                          ? 'line-through text-zinc-400'
+                          : 'text-zinc-800 dark:text-zinc-200 font-medium'
+                      }`}
+                    >
+                      {t.title}
+                    </span>
+                    {t.scheduledTime && (
+                      <span className="text-[10px] font-mono text-zinc-400 shrink-0">
+                        {t.scheduledTime}
+                      </span>
+                    )}
+                  </button>
+                ))}
+                {todayTodos.length > 4 && onNavigateToTasks && (
+                  <button
+                    type="button"
+                    onClick={onNavigateToTasks}
+                    className="text-[11px] text-zinc-500 hover:text-emerald-500 cursor-pointer"
+                  >
+                    +{todayTodos.length - 4} more tasks...
+                  </button>
+                )}
+              </div>
+            )}
+
+            <div className="pt-2 border-t border-zinc-200 dark:border-zinc-800/80 flex items-center justify-between text-[11px] text-zinc-500">
+              <span>Planned for tomorrow</span>
+              <span className="font-semibold text-zinc-700 dark:text-zinc-300">
+                {tomorrowTodosCount} {tomorrowTodosCount === 1 ? 'task' : 'tasks'}
+              </span>
             </div>
           </div>
         </div>
