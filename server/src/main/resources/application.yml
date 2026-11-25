@@ -36,6 +36,8 @@ app:
   auth:
     auto-verify: ${APP_AUTO_VERIFY:true}
     admin-emails: ${ADMIN_EMAILS:azon1129@gmail.com,admin@lockin.app}
+  cookie:
+    secure: ${APP_COOKIE_SECURE:false}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
   ai:

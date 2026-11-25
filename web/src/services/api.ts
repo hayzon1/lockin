@@ -17,8 +17,18 @@ import {
   User,
 } from '../types';
 
+function resolveApiBaseUrl(): string {
+  const raw = (import.meta.env.VITE_API_URL || '').trim();
+  if (!raw) {
+    return '/api/v1';
+  }
+  const withScheme = raw.startsWith('http://') || raw.startsWith('https://') ? raw : `https://${raw}`;
+  const trimmed = withScheme.replace(/\/+$/, '');
+  return trimmed.endsWith('/api/v1') ? trimmed : `${trimmed}/api/v1`;
+}
+
 export const api = axios.create({
-  baseURL: '/api/v1',
+  baseURL: resolveApiBaseUrl(),
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
