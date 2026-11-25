@@ -2,10 +2,9 @@ import { motion, useReducedMotion, useTransform } from 'framer-motion';
 import type { MotionValue } from 'framer-motion';
 import { ArrowDown } from 'lucide-react';
 import Padlock from './Padlock';
-import PrimaryButton from './PrimaryButton';
 import ScrollStage from './ScrollStage';
 
-function HeroContent({ p, onGetStarted }: { p: MotionValue<number>; onGetStarted: () => void }) {
+function HeroContent({ p }: { p: MotionValue<number> }) {
   const reduce = useReducedMotion();
   const lock = useTransform(p, [0, 0.7], [0, 1]);
   const hint = useTransform(p, [0, 0.12], [1, 0]);
@@ -20,10 +19,7 @@ function HeroContent({ p, onGetStarted }: { p: MotionValue<number>; onGetStarted
         A place where you are accountable for your daily actions and track your progress on every step. Think of it as
         keeping a streak with your own growth, a streak that is only yours.
       </p>
-      <div className="mt-6">
-        <PrimaryButton onClick={onGetStarted}>Get started</PrimaryButton>
-      </div>
-      <motion.div style={{ opacity: hint }} className="mt-6 flex flex-col items-center gap-2">
+      <motion.div style={{ opacity: hint }} className="mt-8 flex flex-col items-center gap-2">
         <span className="font-mono text-xs uppercase tracking-[0.2em] text-zinc-600 dark:text-zinc-300">
           Scroll to lock in
         </span>
@@ -40,8 +36,6 @@ function HeroContent({ p, onGetStarted }: { p: MotionValue<number>; onGetStarted
   );
 }
 
-export default function HeroBeat({ onGetStarted }: { onGetStarted: () => void }) {
-  return (
-    <ScrollStage heightVh={240}>{(p) => <HeroContent p={p} onGetStarted={onGetStarted} />}</ScrollStage>
-  );
+export default function HeroBeat() {
+  return <ScrollStage heightVh={240}>{(p) => <HeroContent p={p} />}</ScrollStage>;
 }
