@@ -218,3 +218,21 @@ export interface CoachStatus {
   aiEnabled: boolean;
   activeProvider: 'GEMINI' | 'BUILT_IN';
 }
+
+export type TaskPriority = 'HIGH' | 'MEDIUM' | 'LOW';
+
+export interface TodoTask {
+  id: string;
+  title: string;
+  notes: string | null;
+  dueDate: string;
+  scheduledTime: string | null;
+  priority: TaskPriority;
+  completed: boolean;
+  completedAt: string | null;
+  goalId: string | null;
+  goalTitle: string | null;
+  displayOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}

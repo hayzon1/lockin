@@ -13,6 +13,8 @@ import {
   LongTermGoal,
   PeriodOverviewAnalytics,
   SessionResponse,
+  TaskPriority,
+  TodoTask,
   TrackingPeriod,
   User,
 } from '../types';
@@ -300,4 +302,64 @@ export async function adoptGoalHabits(
     ApiResponse<{ addedHabitsCount: number; periodId: string; periodName: string; goal: LongTermGoal }>
   >(`/goals/${goalId}/adopt-habits`, req);
   return data.data;
+}
+
+// Daily To-Do & Plan Ahead
+export async function getTodos(params?: { date?: string; view?: 'upcoming' | 'overdue' | 'all' }): Promise<TodoTask[]> {
+  const search = new URLSearchParams();
+  if (params?.date) search.set('date', params.date);
+  if (params?.view) search.set('view', params.view);
+  const qs = search.toString();
+  const { data } = await api.get<ApiResponse<TodoTask[]>>(qs ? `/todos?${qs}` : '/todos');
+  return data.data;
+}
+
+export async function createTodo(req: {
+  title: string;
+  notes?: string;
+  dueDate?: string;
+  scheduledTime?: string;
+  priority?: TaskPriority;
+  goalId?: string;
+}): Promise<TodoTask> {
+  const { data } = await api.post<ApiResponse<TodoTask>>('/todos', req);
+  return data.data;
+}
+
+export async function updateTodo(
+  taskId: string,
+  req: {
+    title?: string;
+    notes?: string;
+    dueDate?: string;
+    scheduledTime?: string;
+    priority?: TaskPriority;
+    goalId?: string;
+    clearGoal?: boolean;
+  }
+): Promise<TodoTask> {
+  const { data } = await api.patch<ApiResponse<TodoTask>>(`/todos/${taskId}`, req);
+  return data.data;
+}
+
+export async function toggleTodo(taskId: string): Promise<TodoTask> {
+  const { data } = await api.patch<ApiResponse<TodoTask>>(`/todos/${taskId}/toggle`);
+  return data.data;
+}
+
+export async function rescheduleTodo(taskId: string, dueDate: string): Promise<TodoTask> {
+  const { data } = await api.patch<ApiResponse<TodoTask>>(`/todos/${taskId}/reschedule`, { dueDate });
+  return data.data;
+}
+
+export async function carryOverOverdueTodos(targetDate?: string): Promise<{ movedCount: number; targetDate: string }> {
+  const { data } = await api.post<ApiResponse<{ movedCount: number; targetDate: string }>>(
+    '/todos/carry-over',
+    targetDate ? { targetDate } : {}
+  );
+  return data.data;
+}
+
+export async function deleteTodo(taskId: string): Promise<void> {
+  await api.delete(`/todos/${taskId}`);
 }
