@@ -28,7 +28,7 @@ export default function LandingPage({ onLogin, onGetStarted }: LandingPageProps)
         className="fixed left-0 right-0 top-14 z-20 h-0.5 origin-left bg-emerald-500"
       />
       <main>
-        <HeroBeat onGetStarted={onGetStarted} />
+        <HeroBeat />
         <ProblemBeat />
         <SolutionBeat />
         <LongGoalBeat />
