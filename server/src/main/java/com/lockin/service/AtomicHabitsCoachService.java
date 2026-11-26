@@ -46,11 +46,11 @@ public class AtomicHabitsCoachService {
 
     public AtomicHabitsCoachService(
             @Value("${app.ai.gemini-api-key:}") String geminiApiKey,
-            @Value("${app.ai.gemini-model:gemini-2.5-flash}") String geminiModel,
+            @Value("${app.ai.gemini-model:gemini-3-flash-preview}") String geminiModel,
             ObjectMapper objectMapper
     ) {
         this.geminiApiKey = geminiApiKey != null ? geminiApiKey.trim() : "";
-        this.geminiModel = geminiModel != null && !geminiModel.isBlank() ? geminiModel.trim() : "gemini-2.5-flash";
+        this.geminiModel = geminiModel != null && !geminiModel.isBlank() ? geminiModel.trim() : "gemini-3-flash-preview";
         this.objectMapper = objectMapper;
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(10))
@@ -154,27 +154,47 @@ public class AtomicHabitsCoachService {
                 )
         );
 
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/" + geminiModel + ":generateContent?key=" + geminiApiKey;
+        List<String> models = new ArrayList<>();
+        models.add(geminiModel);
+        if (!"gemini-3.5-flash-lite".equals(geminiModel)) {
+            models.add("gemini-3.5-flash-lite");
+        }
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .timeout(Duration.ofSeconds(18))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(body)))
-                .build();
+        HttpResponse<String> response = null;
+        int lastStatus = 0;
+        for (String model : models) {
+            String url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent";
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .timeout(Duration.ofSeconds(25))
+                    .header("Content-Type", "application/json")
+                    .header("x-goog-api-key", geminiApiKey)
+                    .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(body)))
+                    .build();
 
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() < 200 || response.statusCode() >= 300) {
-            throw new IllegalStateException("Gemini HTTP status " + response.statusCode());
+            response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            lastStatus = response.statusCode();
+            if (lastStatus >= 200 && lastStatus < 300) {
+                break;
+            }
+            log.warn("Gemini coach model {} returned HTTP {}, trying fallback if available", model, lastStatus);
+        }
+        if (response == null || lastStatus < 200 || lastStatus >= 300) {
+            throw new IllegalStateException("Gemini HTTP status " + lastStatus);
         }
 
         JsonNode root = objectMapper.readTree(response.body());
-        JsonNode textNode = root.path("candidates").path(0).path("content").path("parts").path(0).path("text");
-        if (textNode.isMissingNode() || textNode.asText().isBlank()) {
+        StringBuilder textBuilder = new StringBuilder();
+        for (JsonNode part : root.path("candidates").path(0).path("content").path("parts")) {
+            if (part.path("thought").asBoolean(false)) continue;
+            textBuilder.append(part.path("text").asText(""));
+        }
+        String rawText = textBuilder.toString().trim();
+        if (rawText.isBlank()) {
             throw new IllegalStateException("Empty response from Gemini");
         }
 
-        String rawJson = stripCodeFences(textNode.asText().trim());
+        String rawJson = stripCodeFences(rawText);
         JsonNode parsed = objectMapper.readTree(rawJson);
 
         String identity = firstNonBlank(userIdentityStatement, parsed.path("identityStatement").asText(""), "I am becoming someone who shows up daily for " + title);

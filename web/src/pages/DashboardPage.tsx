@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as api from '../services/api';
 import { useTheme } from '../context/ThemeContext';
+import TodaysLessons from '../components/learning/TodaysLessons';
 import confetti from 'canvas-confetti';
 import {
   CheckCircle2,
@@ -245,6 +246,8 @@ export default function DashboardPage({ onNavigateToPeriods, onNavigateToTasks }
           </p>
         </div>
       </div>
+
+      <TodaysLessons />
 
       {/* Main Grid: Checklist & Quick Stats */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

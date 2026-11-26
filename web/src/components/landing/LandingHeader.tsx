@@ -1,13 +1,11 @@
 import { Moon, Sun, Target } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
-import PrimaryButton from './PrimaryButton';
 
 interface LandingHeaderProps {
   onLogin: () => void;
-  onGetStarted: () => void;
 }
 
-export default function LandingHeader({ onLogin, onGetStarted }: LandingHeaderProps) {
+export default function LandingHeader({ onLogin }: LandingHeaderProps) {
   const { resolvedTheme, setTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
 
@@ -36,9 +34,6 @@ export default function LandingHeader({ onLogin, onGetStarted }: LandingHeaderPr
           >
             Log in
           </button>
-          <PrimaryButton small onClick={onGetStarted}>
-            Get started
-          </PrimaryButton>
         </div>
       </div>
     </header>

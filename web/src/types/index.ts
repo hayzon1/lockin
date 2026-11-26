@@ -236,3 +236,41 @@ export interface TodoTask {
   createdAt: string;
   updatedAt: string;
 }
+
+export type LessonType = 'READ' | 'VIDEO' | 'PRACTICE';
+
+export interface LearningLesson {
+  id: string;
+  dayNumber: number;
+  title: string;
+  description: string | null;
+  resourceTitle: string | null;
+  resourceUrl: string | null;
+  resourceType: LessonType;
+  durationMinutes: number;
+  completed: boolean;
+}
+
+export interface LearningPlan {
+  id: string;
+  goalId: string;
+  level: string;
+  minutesPerDay: number;
+  learningStyle: string;
+  totalDays: number;
+  startDate: string;
+  summary: string | null;
+  provider: 'GEMINI' | 'BUILT_IN';
+  completedCount: number;
+  currentDay: number;
+  lessons: LearningLesson[];
+}
+
+export interface TodayLesson {
+  goalId: string;
+  goalTitle: string;
+  day: number;
+  totalDays: number;
+  completedCount: number;
+  lesson: LearningLesson;
+}
