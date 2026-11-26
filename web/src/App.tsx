@@ -3,7 +3,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import AppLayout from './layouts/AppLayout';
-import AuthPage from './pages/AuthPage';
+import AuthPage, { WELCOME_KEY } from './pages/AuthPage';
+import WelcomeTour from './components/onboarding/WelcomeTour';
 import LandingPage from './pages/LandingPage';
 import DashboardPage from './pages/DashboardPage';
 import TasksPage from './pages/TasksPage';
@@ -37,9 +38,28 @@ function MainApp() {
     new URLSearchParams(window.location.search).has('token') ? 'login' : null
   );
 
+  const [showWelcome, setShowWelcome] = useState(false);
+
   useEffect(() => {
-    if (user) setAuthMode(null);
+    if (!user) return;
+    setAuthMode(null);
+    // Show the welcome page once, right after sign up.
+    try {
+      if (localStorage.getItem(WELCOME_KEY) === user.email.toLowerCase()) setShowWelcome(true);
+    } catch {
+      // ignore
+    }
   }, [user]);
+
+  const finishWelcome = (goTo?: NavTab) => {
+    try {
+      localStorage.removeItem(WELCOME_KEY);
+    } catch {
+      // ignore
+    }
+    setShowWelcome(false);
+    setCurrentTab(goTo ?? 'dashboard');
+  };
 
   if (loading) {
     return (
@@ -57,6 +77,10 @@ function MainApp() {
       return <AuthPage initialMode={authMode} onBack={() => setAuthMode(null)} />;
     }
     return <LandingPage onLogin={() => setAuthMode('login')} onGetStarted={() => setAuthMode('register')} />;
+  }
+
+  if (showWelcome) {
+    return <WelcomeTour nickname={user.fullName ?? ''} onFinish={finishWelcome} />;
   }
 
   return (

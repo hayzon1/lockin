@@ -2,6 +2,7 @@ import { useState, FormEvent } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as api from '../services/api';
 import { LongTermGoal } from '../types';
+import LearningPlanPanel from '../components/learning/LearningPlanPanel';
 import {
   Compass,
   Plus,
@@ -87,6 +88,8 @@ export default function GoalsPage({ onNavigateToDashboard }: GoalsPageProps) {
   // Per-goal interactive state
   const [selectedHabitsByGoal, setSelectedHabitsByGoal] = useState<Record<string, string[]>>({});
   const [adoptDurationByGoal, setAdoptDurationByGoal] = useState<Record<string, number>>({});
+  const [newGoalId, setNewGoalId] = useState<string | null>(null);
+  const [customizingIds, setCustomizingIds] = useState<string[]>([]);
   const [addingMilestoneGoalId, setAddingMilestoneGoalId] = useState<string | null>(null);
   const [newMilestoneTitle, setNewMilestoneTitle] = useState('');
   const [newMilestoneDate, setNewMilestoneDate] = useState('');
@@ -113,6 +116,7 @@ export default function GoalsPage({ onNavigateToDashboard }: GoalsPageProps) {
       queryClient.invalidateQueries({ queryKey: ['goals'] });
       setShowCreateModal(false);
       resetCreateForm();
+      setNewGoalId(created.id);
       // Pre-select all generated habits for easy one-click adoption
       setSelectedHabitsByGoal((prev) => ({
         ...prev,
@@ -675,6 +679,68 @@ export default function GoalsPage({ onNavigateToDashboard }: GoalsPageProps) {
 
                   {/* Right 3 Cols: Recommended Daily Atomic Habits */}
                   <div className="lg:col-span-3 space-y-3">
+                    {!customizingIds.includes(goal.id) ? (
+                      <>
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5">
+                            <Zap className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
+                            <span>Your daily habits</span>
+                          </h4>
+                          <button
+                            type="button"
+                            onClick={() => setCustomizingIds((prev) => [...prev, goal.id])}
+                            className="text-xs font-medium text-emerald-700 dark:text-emerald-400 hover:underline cursor-pointer"
+                          >
+                            Customize habits
+                          </button>
+                        </div>
+                        {goal.suggestedHabits.some((h) => h.adopted) ? (
+                          <ul className="flex flex-wrap gap-2">
+                            {goal.suggestedHabits
+                              .filter((h) => h.adopted)
+                              .map((h) => (
+                                <li
+                                  key={h.id}
+                                  className="px-3 py-1.5 rounded-full text-xs border border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300"
+                                >
+                                  {h.name}
+                                </li>
+                              ))}
+                          </ul>
+                        ) : (
+                          <div className="space-y-3">
+                            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                              Three daily habits are picked for you. Press start to begin tracking them for 30 days.
+                            </p>
+                            <button
+                              type="button"
+                              disabled={adoptHabitsMutation.isPending}
+                              onClick={() => {
+                                const ids = goal.suggestedHabits.slice(0, 3).map((h) => h.id);
+                                adoptHabitsMutation.mutate({
+                                  goalId: goal.id,
+                                  suggestedHabitIds: ids,
+                                  mode: activePeriod ? 'ADD_TO_ACTIVE_PERIOD' : 'START_NEW_PERIOD',
+                                  presetDays: 30,
+                                });
+                              }}
+                              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 dark:bg-emerald-500 dark:hover:bg-emerald-400 disabled:opacity-50 text-white dark:text-zinc-950 text-xs font-semibold shadow-sm cursor-pointer"
+                            >
+                              <Sparkles className="w-3.5 h-3.5" />
+                              {adoptHabitsMutation.isPending ? 'Starting...' : 'Start tracking'}
+                            </button>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                    <button
+                      type="button"
+                      onClick={() => setCustomizingIds((prev) => prev.filter((id) => id !== goal.id))}
+                      className="text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white cursor-pointer"
+                    >
+                      Hide customization
+                    </button>
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5">
                         <Zap className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
@@ -811,8 +877,23 @@ export default function GoalsPage({ onNavigateToDashboard }: GoalsPageProps) {
                         </button>
                       </div>
                     </div>
+                      </>
+                    )}
                   </div>
                 </div>
+
+                <LearningPlanPanel
+                  goalId={goal.id}
+                  goalTitle={goal.title}
+                  periodDays={activePeriod?.totalDays}
+                  startOpen={goal.id === newGoalId}
+                  habitIdsToAdopt={
+                    goal.suggestedHabits.some((h) => h.adopted)
+                      ? []
+                      : goal.suggestedHabits.slice(0, 3).map((h) => h.id)
+                  }
+                  hasActivePeriod={!!activePeriod}
+                />
               </div>
             );
           })}

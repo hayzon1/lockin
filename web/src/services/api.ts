@@ -10,6 +10,8 @@ import {
   Habit,
   HabitAnalytics,
   Insight,
+  LearningPlan,
+  TodayLesson,
   LongTermGoal,
   PeriodOverviewAnalytics,
   SessionResponse,
@@ -304,6 +306,15 @@ export async function adoptGoalHabits(
   return data.data;
 }
 
+/** One-step start: adds the goal's habits to your active period, or opens a new period of that many days. */
+export function startGoalTracking(goalId: string, habitIds: string[], hasActivePeriod: boolean, days: number) {
+  return adoptGoalHabits(goalId, {
+    suggestedHabitIds: habitIds,
+    mode: hasActivePeriod ? 'ADD_TO_ACTIVE_PERIOD' : 'START_NEW_PERIOD',
+    presetDays: Math.max(7, days),
+  });
+}
+
 // Daily To-Do & Plan Ahead
 export async function getTodos(params?: { date?: string; view?: 'upcoming' | 'overdue' | 'all' }): Promise<TodoTask[]> {
   const search = new URLSearchParams();
@@ -362,4 +373,37 @@ export async function carryOverOverdueTodos(targetDate?: string): Promise<{ move
 
 export async function deleteTodo(taskId: string): Promise<void> {
   await api.delete(`/todos/${taskId}`);
+}
+
+// Learning plans
+export async function getLearningPlan(goalId: string): Promise<LearningPlan | null> {
+  const { data } = await api.get<ApiResponse<LearningPlan | null>>(`/goals/${goalId}/learning-plan`);
+  return data.data ?? null;
+}
+
+export async function createLearningPlan(
+  goalId: string,
+  req: { level: string; minutesPerDay: number; learningStyle: string; days: number }
+): Promise<LearningPlan> {
+  // Live web search and link checks can take a while, so allow up to three minutes.
+  const { data } = await api.post<ApiResponse<LearningPlan>>(`/goals/${goalId}/learning-plan`, req, {
+    timeout: 180000,
+  });
+  return data.data;
+}
+
+export async function toggleLearningLesson(goalId: string, lessonId: string): Promise<LearningPlan> {
+  const { data } = await api.patch<ApiResponse<LearningPlan>>(
+    `/goals/${goalId}/learning-plan/lessons/${lessonId}/toggle`
+  );
+  return data.data;
+}
+
+export async function deleteLearningPlan(goalId: string): Promise<void> {
+  await api.delete(`/goals/${goalId}/learning-plan`);
+}
+
+export async function getTodayLessons(): Promise<TodayLesson[]> {
+  const { data } = await api.get<ApiResponse<TodayLesson[]>>('/learning/today');
+  return data.data ?? [];
 }
